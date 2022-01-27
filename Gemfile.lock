@@ -74,11 +74,7 @@ GEM
     ffi (1.15.5)
     globalid (1.0.0)
       activesupport (>= 5.0)
-<<<<<<< HEAD
     i18n (1.9.0)
-=======
-    i18n (1.8.11)
->>>>>>> be07c2e2b36332302b1ef3a3857c52493721be37
       concurrent-ruby (~> 1.0)
     jbuilder (2.11.5)
       actionview (>= 5.0.0)
@@ -117,11 +113,7 @@ GEM
       mini_portile2 (~> 2.7.0)
       racc (~> 1.4)
     orm_adapter (0.5.0)
-<<<<<<< HEAD
-    pg (1.1.4)
-=======
     pg (1.2.3)
->>>>>>> be07c2e2b36332302b1ef3a3857c52493721be37
     postmark (1.22.0)
       json
     postmark-rails (0.22.0)
@@ -133,12 +125,8 @@ GEM
     pry-rails (0.3.9)
       pry (>= 0.10.4)
     public_suffix (4.0.6)
-<<<<<<< HEAD
-    puma (3.12.6)
-=======
     puma (5.5.2)
       nio4r (~> 2.0)
->>>>>>> be07c2e2b36332302b1ef3a3857c52493721be37
     racc (1.6.0)
     rack (2.2.3)
     rack-test (1.1.0)
