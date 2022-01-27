@@ -33,25 +33,24 @@
 #
 #
 #
-10.times do
+20.times do
   RailwayStation.create(
       title: Faker::Address.city
   )
 end
-#
-# 10.times do
-#   Route.create(
-#       name: "#{Faker::Address.city} - #{Faker::Address.city}"
-#   )
-# end
-#
-#
-# 10.times do
-#   Train.create(
-#       number: Faker::Address.building_number
-#   )
-# end
-#
+
+10.times do
+  Route.create(
+      name: "#{Faker::Address.city} - #{Faker::Address.city}"
+  )
+end
+
+10.times do
+  Train.create(
+      number: Faker::Address.building_number
+  )
+end
+
 route_1 = Route.new
 route_1.railway_stations << RailwayStation.first
 route_1.railway_stations << RailwayStation.second
@@ -59,7 +58,14 @@ route_1.save
 
 10.times do
   route = Route.new
-  rand_station = RailwayStation.order(Arel.sql('RANDOM()')).first
-  route.railway_stations << rand_station
+  rand_station1 = RailwayStation.order(Arel.sql('RANDOM()')).first
+  rand_station2 = RailwayStation.order(Arel.sql('RANDOM()')).first
+  if rand_station1 == rand_station2
+    rand_station2 = RailwayStation.order(Arel.sql('RANDOM()')).first
+  end
+
+  route.railway_stations << rand_station1
+  route.railway_stations << rand_station2
+  route.name = "#{rand_station1.title} - #{rand_station2.title}"
   route.save
 end
