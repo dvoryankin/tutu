@@ -1,4 +1,4 @@
-class AddTypeToCarriage < ActiveRecord::Migration[5.0]
+class AddTypeToCarriage < ActiveRecord::Migration[7.0]
   def change
     add_column :carriages, :type, :string
     rename_column :carriages, :low_seats, :bottom_seats
