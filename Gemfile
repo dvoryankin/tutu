@@ -1,11 +1,11 @@
 source 'https://rubygems.org'
-ruby '2.7.5'
+ruby '3.2.2'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.2.3'
+gem 'rails'#, '~> 5.2.3'
 # Use sqlite3 as the database for Active Record
-gem 'pg', '1.2.3'
+gem 'pg', '1.4.6'
 
 # Use Puma as the app server
 gem 'puma', '~> 5.5.2'
@@ -27,7 +27,8 @@ gem 'jbuilder', '~> 2.5'
 
 gem 'devise'
 
-gem 'therubyracer'
+# gem 'execjs'
+# gem 'therubyracer'
 gem 'twitter-bootstrap-rails'
 
 gem 'rails_12factor'
