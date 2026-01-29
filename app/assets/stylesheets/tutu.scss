@@ -1,0 +1,289 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap");
+
+:root {
+  --tutu-bg: #f4f7fb;
+  --tutu-surface: #ffffff;
+  --tutu-primary: #0c5460;
+  --tutu-primary-strong: #063b44;
+  --tutu-accent: #f2a65a;
+  --tutu-text: #0f172a;
+  --tutu-muted: #6b7280;
+  --tutu-border: #e2e8f0;
+  --tutu-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  --tutu-radius: 18px;
+  --tutu-font-sans: "Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --tutu-font-display: "Playfair Display", "Times New Roman", serif;
+}
+
+body.tutu-body {
+  font-family: var(--tutu-font-sans);
+  color: var(--tutu-text);
+  background: var(--tutu-bg);
+  min-height: 100vh;
+}
+
+.tutu-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(1200px 600px at 10% -20%, rgba(147, 197, 253, 0.25), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(94, 234, 212, 0.2), transparent 60%),
+    linear-gradient(180deg, #f6f9fc 0%, #eef3f8 55%, #f8fafc 100%);
+}
+
+.tutu-bg::before,
+.tutu-bg::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  filter: blur(0px);
+  opacity: 0.35;
+}
+
+.tutu-bg::before {
+  top: 8%;
+  left: 8%;
+  background: radial-gradient(circle, rgba(14, 116, 144, 0.35) 0%, transparent 70%);
+}
+
+.tutu-bg::after {
+  bottom: 10%;
+  right: 6%;
+  background: radial-gradient(circle, rgba(244, 162, 97, 0.4) 0%, transparent 70%);
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+.tutu-header {
+  padding: 1.5rem 0 0.75rem;
+}
+
+.tutu-navbar {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--tutu-border);
+  border-radius: var(--tutu-radius);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.tutu-navbar .navbar-brand {
+  font-family: var(--tutu-font-display);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brand-mark {
+  background: linear-gradient(120deg, #0f766e, #0ea5a4 55%, #f59e0b 120%);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.brand-tagline {
+  font-size: 0.8rem;
+  color: var(--tutu-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.navbar .nav-link {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+  color: var(--tutu-primary);
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-header .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--tutu-muted);
+}
+
+.hero {
+  padding: 2.5rem 0 2rem;
+}
+
+.hero-title {
+  font-family: var(--tutu-font-display);
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  line-height: 1.1;
+}
+
+.hero-lead {
+  font-size: 1.1rem;
+  color: var(--tutu-muted);
+}
+
+.hero-card {
+  background: var(--tutu-surface);
+  border: 1px solid var(--tutu-border);
+  border-radius: var(--tutu-radius);
+  box-shadow: var(--tutu-shadow);
+  padding: 1.75rem;
+}
+
+.hero-card .stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.5);
+}
+
+.hero-card .stat:last-child {
+  border-bottom: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(12, 84, 96, 0.08);
+  color: var(--tutu-primary);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--tutu-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(12, 84, 96, 0.12);
+  color: var(--tutu-primary);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.tutu-section {
+  padding: 2rem 0;
+}
+
+.card {
+  border: 1px solid var(--tutu-border);
+  border-radius: 16px;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+}
+
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--tutu-border);
+}
+
+.list-group-item {
+  border-color: var(--tutu-border);
+}
+
+.tutu-vehicle-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tutu-vehicle-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 40px rgba(15, 23, 42, 0.12);
+}
+
+.table {
+  background: var(--tutu-surface);
+}
+
+.table thead th {
+  color: var(--tutu-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+.form-control,
+.form-select {
+  border-radius: 12px;
+  border-color: var(--tutu-border);
+  box-shadow: none;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: rgba(12, 84, 96, 0.6);
+  box-shadow: 0 0 0 0.2rem rgba(12, 84, 96, 0.15);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--tutu-primary);
+  --bs-btn-border-color: var(--tutu-primary);
+  --bs-btn-hover-bg: var(--tutu-primary-strong);
+  --bs-btn-hover-border-color: var(--tutu-primary-strong);
+  --bs-btn-active-bg: var(--tutu-primary-strong);
+  --bs-btn-active-border-color: var(--tutu-primary-strong);
+  --bs-btn-focus-shadow-rgb: 12, 84, 96;
+  font-weight: 600;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--tutu-primary);
+  --bs-btn-border-color: var(--tutu-primary);
+  --bs-btn-hover-bg: var(--tutu-primary);
+  --bs-btn-hover-border-color: var(--tutu-primary);
+  --bs-btn-active-bg: var(--tutu-primary-strong);
+  --bs-btn-active-border-color: var(--tutu-primary-strong);
+}
+
+.badge.bg-light {
+  color: #1f2937;
+}
+
+.tutu-footer {
+  margin-top: 3rem;
+  border-top: 1px solid var(--tutu-border);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.auth-card {
+  max-width: 460px;
+  margin: 2rem auto 0;
+}
+
+.auth-card .card {
+  border-radius: var(--tutu-radius);
+}
+
+.auth-links a {
+  color: var(--tutu-muted);
+}
+
+.auth-links a:hover {
+  color: var(--tutu-primary);
+}

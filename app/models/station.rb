@@ -17,6 +17,12 @@ class Station < ApplicationRecord
     end
   end
 
+  def self.sti_class_for(type_name)
+    return Station if type_name == 'RailwayStation'
+
+    super
+  end
+
   def update_position(route, position)
     station = route_station(route)
     station.update(position: position) if station

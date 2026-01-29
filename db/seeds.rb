@@ -18,19 +18,20 @@ StationsRoute.destroy_all
 FavoriteRoute.destroy_all
 ApiToken.destroy_all
 
-# Keep existing railway stations and routes for backwards compatibility
-# RailwayStationsRoute.destroy_all
-# RailwayStation.destroy_all
-# Route.destroy_all
-
 puts "Creating stations..."
 
-# Railway Stations
+# Railway Stations (using raw insert to avoid STI conflict with existing RailwayStation model)
 railway_cities = ['Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg', 'Kazan', 'Nizhny Novgorod', 'Samara', 'Omsk', 'Chelyabinsk', 'Rostov-on-Don']
 railway_stations = railway_cities.map do |city|
-  Station.find_or_create_by!(title: "#{city} Railway Station", type: 'RailwayStation') do |s|
-    s.city = city
+  station = Station.find_by(title: "#{city} Railway Station", type: 'RailwayStation')
+  unless station
+    station = Station.new
+    station.title = "#{city} Railway Station"
+    station.city = city
+    station[:type] = 'RailwayStation'  # Set type directly to avoid STI lookup
+    station.save!
   end
+  station
 end
 puts "  Created #{railway_stations.count} railway stations"
 
@@ -56,7 +57,7 @@ puts "  Created #{airports.count} airports"
 # Bus Stations
 bus_cities = ['Moscow', 'Saint Petersburg', 'Kazan', 'Nizhny Novgorod', 'Vladimir', 'Yaroslavl', 'Tver', 'Ryazan']
 bus_stations = bus_cities.map do |city|
-  BusStation.find_or_create_by!(title: "#{city} Bus Station", type: 'BusStation') do |s|
+  BusStation.find_or_create_by!(title: "#{city} Bus Station") do |s|
     s.city = city
   end
 end
@@ -64,18 +65,24 @@ puts "  Created #{bus_stations.count} bus stations"
 
 puts "Creating routes..."
 
+# Helper to find station by city
+def find_railway_station(city)
+  Station.find_by(city: city, type: 'RailwayStation')
+end
+
 # Train Routes
-train_routes = [
-  { name: 'Moscow - Saint Petersburg', stations: ['Moscow', 'Tver', 'Saint Petersburg'] },
-  { name: 'Moscow - Kazan', stations: ['Moscow', 'Nizhny Novgorod', 'Kazan'] },
-  { name: 'Moscow - Novosibirsk', stations: ['Moscow', 'Kazan', 'Yekaterinburg', 'Omsk', 'Novosibirsk'] },
-  { name: 'Saint Petersburg - Kazan', stations: ['Saint Petersburg', 'Moscow', 'Nizhny Novgorod', 'Kazan'] }
+train_routes_data = [
+  { name: 'Moscow - Saint Petersburg', cities: ['Moscow', 'Saint Petersburg'] },
+  { name: 'Moscow - Kazan', cities: ['Moscow', 'Nizhny Novgorod', 'Kazan'] },
+  { name: 'Moscow - Novosibirsk', cities: ['Moscow', 'Kazan', 'Yekaterinburg', 'Omsk', 'Novosibirsk'] },
+  { name: 'Saint Petersburg - Kazan', cities: ['Saint Petersburg', 'Moscow', 'Nizhny Novgorod', 'Kazan'] }
 ]
 
-train_routes.each do |route_data|
-  route = Route.find_or_create_by!(name: route_data[:name])
-  route_data[:stations].each_with_index do |city, index|
-    station = Station.find_by(city: city, type: 'RailwayStation')
+train_routes_data.each do |route_data|
+  route = Route.find_or_initialize_by(name: route_data[:name])
+  route.save!(validate: false) if route.new_record?
+  route_data[:cities].each_with_index do |city, index|
+    station = find_railway_station(city)
     next unless station
     StationsRoute.find_or_create_by!(station: station, route: route) do |sr|
       sr.position = index
@@ -84,21 +91,22 @@ train_routes.each do |route_data|
     end
   end
 end
-puts "  Created #{train_routes.count} train routes"
+puts "  Created #{train_routes_data.count} train routes"
 
 # Flight Routes
 flight_routes = [
-  { name: 'Moscow (SVO) - Saint Petersburg', start: 'SVO', end: 'LED' },
-  { name: 'Moscow (DME) - Sochi', start: 'DME', end: 'AER' },
-  { name: 'Moscow (SVO) - Novosibirsk', start: 'SVO', end: 'OVB' },
-  { name: 'Saint Petersburg - Kazan', start: 'LED', end: 'KZN' },
-  { name: 'Moscow (SVO) - Yekaterinburg', start: 'SVO', end: 'SVX' }
+  { name: 'Moscow (SVO) - Saint Petersburg', start: 'SVO', end_code: 'LED' },
+  { name: 'Moscow (DME) - Sochi', start: 'DME', end_code: 'AER' },
+  { name: 'Moscow (SVO) - Novosibirsk', start: 'SVO', end_code: 'OVB' },
+  { name: 'Saint Petersburg - Kazan', start: 'LED', end_code: 'KZN' },
+  { name: 'Moscow (SVO) - Yekaterinburg', start: 'SVO', end_code: 'SVX' }
 ]
 
 flight_routes.each do |route_data|
-  route = Route.find_or_create_by!(name: route_data[:name])
+  route = Route.find_or_initialize_by(name: route_data[:name])
+  route.save!(validate: false) if route.new_record?
   start_airport = Airport.find_by(code: route_data[:start])
-  end_airport = Airport.find_by(code: route_data[:end])
+  end_airport = Airport.find_by(code: route_data[:end_code])
   next unless start_airport && end_airport
 
   StationsRoute.find_or_create_by!(station: start_airport, route: route) do |sr|
@@ -113,16 +121,17 @@ end
 puts "  Created #{flight_routes.count} flight routes"
 
 # Bus Routes
-bus_routes = [
-  { name: 'Moscow - Vladimir (Bus)', stations: ['Moscow', 'Vladimir'] },
-  { name: 'Moscow - Yaroslavl (Bus)', stations: ['Moscow', 'Yaroslavl'] },
-  { name: 'Moscow - Ryazan (Bus)', stations: ['Moscow', 'Ryazan'] },
-  { name: 'Saint Petersburg - Kazan (Bus)', stations: ['Saint Petersburg', 'Moscow', 'Nizhny Novgorod', 'Kazan'] }
+bus_routes_data = [
+  { name: 'Moscow - Vladimir (Bus)', cities: ['Moscow', 'Vladimir'] },
+  { name: 'Moscow - Yaroslavl (Bus)', cities: ['Moscow', 'Yaroslavl'] },
+  { name: 'Moscow - Ryazan (Bus)', cities: ['Moscow', 'Ryazan'] },
+  { name: 'Saint Petersburg - Tver (Bus)', cities: ['Saint Petersburg', 'Tver'] }
 ]
 
-bus_routes.each do |route_data|
-  route = Route.find_or_create_by!(name: route_data[:name])
-  route_data[:stations].each_with_index do |city, index|
+bus_routes_data.each do |route_data|
+  route = Route.find_or_initialize_by(name: route_data[:name])
+  route.save!(validate: false) if route.new_record?
+  route_data[:cities].each_with_index do |city, index|
     station = BusStation.find_by(city: city)
     next unless station
     StationsRoute.find_or_create_by!(station: station, route: route) do |sr|
@@ -132,7 +141,7 @@ bus_routes.each do |route_data|
     end
   end
 end
-puts "  Created #{bus_routes.count} bus routes"
+puts "  Created #{bus_routes_data.count} bus routes"
 
 puts "Creating vehicles..."
 
@@ -148,7 +157,7 @@ trains_data.each do |train_data|
   route = Route.find_by(name: train_data[:route])
   next unless route
 
-  train = Train.find_or_create_by!(number: train_data[:number], type: 'Train') do |t|
+  train = Train.find_or_create_by!(number: train_data[:number]) do |t|
     t.route = route
     t.current_station = route.stations.first
   end
@@ -165,7 +174,7 @@ trains_data.each do |train_data|
     comp = train.compartments.find_or_create_by!(class_type: comp_data[:class_type], type: 'TrainCompartment') do |c|
       c.base_price = comp_data[:base_price]
     end
-    comp.generate_seats! if comp.seats.empty?
+    comp.generate_seats! if comp.seats.empty? && comp.respond_to?(:generate_seats!)
   end
 end
 puts "  Created #{Train.count} trains"
@@ -182,7 +191,7 @@ planes_data.each do |plane_data|
   route = Route.find_by(name: plane_data[:route])
   next unless route
 
-  plane = Plane.find_or_create_by!(number: plane_data[:number], type: 'Plane') do |p|
+  plane = Plane.find_or_create_by!(number: plane_data[:number]) do |p|
     p.route = route
     p.current_station = route.stations.first
   end
@@ -196,7 +205,7 @@ planes_data.each do |plane_data|
     cabin = plane.compartments.find_or_create_by!(class_type: cabin_data[:class_type], type: 'AirplaneCabin') do |c|
       c.base_price = cabin_data[:base_price]
     end
-    cabin.generate_seats! if cabin.seats.empty?
+    cabin.generate_seats! if cabin.seats.empty? && cabin.respond_to?(:generate_seats!)
   end
 end
 puts "  Created #{Plane.count} planes"
@@ -212,7 +221,7 @@ buses_data.each do |bus_data|
   route = Route.find_by(name: bus_data[:route])
   next unless route
 
-  bus = Bus.find_or_create_by!(number: bus_data[:number], type: 'Bus') do |b|
+  bus = Bus.find_or_create_by!(number: bus_data[:number]) do |b|
     b.route = route
     b.current_station = route.stations.first
   end
@@ -224,7 +233,7 @@ buses_data.each do |bus_data|
     section = bus.compartments.find_or_create_by!(class_type: section_data[:class_type], type: 'BusSection') do |c|
       c.base_price = section_data[:base_price]
     end
-    section.generate_seats! if section.seats.empty?
+    section.generate_seats! if section.seats.empty? && section.respond_to?(:generate_seats!)
   end
 end
 puts "  Created #{Bus.count} buses"

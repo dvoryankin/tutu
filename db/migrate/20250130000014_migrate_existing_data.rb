@@ -7,9 +7,9 @@ class MigrateExistingData < ActiveRecord::Migration[7.0]
       FROM railway_stations;
     SQL
 
-    # Reset sequence for stations table
+    # Reset sequence for stations table (only if there's data)
     execute <<-SQL
-      SELECT setval('stations_id_seq', (SELECT MAX(id) FROM stations));
+      SELECT setval('stations_id_seq', GREATEST((SELECT COALESCE(MAX(id), 0) FROM stations), 1));
     SQL
 
     # Migrate trains -> vehicles (type: 'Train')
@@ -19,9 +19,9 @@ class MigrateExistingData < ActiveRecord::Migration[7.0]
       FROM trains;
     SQL
 
-    # Reset sequence for vehicles table
+    # Reset sequence for vehicles table (only if there's data)
     execute <<-SQL
-      SELECT setval('vehicles_id_seq', (SELECT MAX(id) FROM vehicles));
+      SELECT setval('vehicles_id_seq', GREATEST((SELECT COALESCE(MAX(id), 0) FROM vehicles), 1));
     SQL
 
     # Migrate railway_stations_routes -> stations_routes
@@ -64,9 +64,9 @@ class MigrateExistingData < ActiveRecord::Migration[7.0]
       FROM carriages;
     SQL
 
-    # Reset sequence for compartments table
+    # Reset sequence for compartments table (only if there's data)
     execute <<-SQL
-      SELECT setval('compartments_id_seq', (SELECT COALESCE(MAX(id), 0) FROM compartments));
+      SELECT setval('compartments_id_seq', GREATEST((SELECT COALESCE(MAX(id), 0) FROM compartments), 1));
     SQL
 
     # Update tickets to reference vehicles instead of trains

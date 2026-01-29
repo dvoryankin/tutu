@@ -1,10 +1,103 @@
-<h1>RailWay</h1>
+<section class="hero">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-6">
+      <span class="hero-badge">One search. All transport.</span>
+      <h1 class="hero-title mt-3">Билеты на поезд, самолет и автобус — в одном окне.</h1>
+      <p class="hero-lead mt-3">
+        Планируйте поездку быстро: сравните время, цены и доступные места.
+        От поиска до бронирования — за пару минут.
+      </p>
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        <%= link_to "Начать поиск", search_path, class: "btn btn-primary btn-lg" %>
+        <% if user_signed_in? %>
+          <%= link_to "Профиль", profile_path, class: "btn btn-outline-primary btn-lg" %>
+        <% else %>
+          <%= link_to "Войти", new_user_session_path, class: "btn btn-outline-primary btn-lg" %>
+        <% end %>
+      </div>
+      <div class="d-flex flex-wrap gap-3 mt-4">
+        <div class="d-flex align-items-center gap-2">
+          <span class="feature-icon">24/7</span>
+          <div>
+            <div class="fw-semibold">Доступные места</div>
+            <div class="text-muted small">Обновляются в реальном времени</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="feature-icon">+3</span>
+          <div>
+            <div class="fw-semibold">Типы транспорта</div>
+            <div class="text-muted small">Поезда, самолеты, автобусы</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<div>
-  <ul>
-    <li><%= link_to t('admin.railway_stations.list'), admin_railway_stations_path %></li>
-    <li><%= link_to t('admin.routes.list'), admin_routes_path %></li>
-    <li><%= link_to t('admin.trains.list'), admin_trains_path %></li>
-    <li><%= link_to t('admin.tickets.list'), admin_tickets_path %></li>
-  </ul>
-</div>
+    <div class="col-lg-6">
+      <div class="hero-card">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="hero-badge">Live dashboard</span>
+          <span class="text-muted small">TUTU Platform</span>
+        </div>
+        <div class="stat">
+          <div>
+            <div class="text-muted small">Поиск маршрутов</div>
+            <div class="fw-semibold">Все виды транспорта</div>
+          </div>
+          <span class="badge bg-light border">Unified</span>
+        </div>
+        <div class="stat">
+          <div>
+            <div class="text-muted small">Выбор мест</div>
+            <div class="fw-semibold">Интерактивные карты</div>
+          </div>
+          <span class="badge bg-light border">Smart</span>
+        </div>
+        <div class="stat">
+          <div>
+            <div class="text-muted small">Оплата</div>
+            <div class="fw-semibold">Корзина и быстрый чек-аут</div>
+          </div>
+          <span class="badge bg-light border">Secure</span>
+        </div>
+        <% if user_signed_in? && current_user.admin? %>
+          <div class="mt-4">
+            <div class="text-uppercase text-muted small mb-2">Admin shortcuts</div>
+            <div class="d-grid gap-2">
+              <%= link_to t('admin.railway_stations.list'), admin_railway_stations_path, class: "btn btn-outline-secondary btn-sm" %>
+              <%= link_to t('admin.routes.list'), admin_routes_path, class: "btn btn-outline-secondary btn-sm" %>
+              <%= link_to t('admin.trains.list'), admin_trains_path, class: "btn btn-outline-secondary btn-sm" %>
+              <%= link_to t('admin.tickets.list'), admin_tickets_path, class: "btn btn-outline-secondary btn-sm" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tutu-section">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="feature-card h-100">
+        <div class="feature-icon mb-3">TR</div>
+        <h5>Поезда</h5>
+        <p class="text-muted mb-0">Маршруты с точными прибытиями и удобной рассадкой по вагонам.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card h-100">
+        <div class="feature-icon mb-3">FL</div>
+        <h5>Самолеты</h5>
+        <p class="text-muted mb-0">Быстрые перелеты с гибким выбором класса и дополнительных услуг.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card h-100">
+        <div class="feature-icon mb-3">BS</div>
+        <h5>Автобусы</h5>
+        <p class="text-muted mb-0">Оптимальный баланс цены и комфорта для коротких и длинных поездок.</p>
+      </div>
+    </div>
+  </div>
+</section>

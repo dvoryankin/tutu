@@ -6,87 +6,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= content_for?(:title) ? yield(:title) : "TUTU - Travel Booking" %></title>
     <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
   </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-      <div class="container">
-        <a class="navbar-brand" href="<%= root_path %>">TUTU</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <%= link_to "Search", search_path, class: "nav-link" %>
-            </li>
-            <% if user_signed_in? %>
-              <li class="nav-item">
-                <%= link_to "My Tickets", tickets_path, class: "nav-link" %>
-              </li>
-              <li class="nav-item">
-                <%= link_to "Orders", orders_path, class: "nav-link" %>
-              </li>
-              <li class="nav-item">
-                <%= link_to "Favorites", favorite_routes_path, class: "nav-link" %>
-              </li>
-            <% end %>
-          </ul>
-          <ul class="navbar-nav">
-            <% if user_signed_in? %>
-              <li class="nav-item">
-                <%= link_to cart_path, class: "nav-link" do %>
-                  Cart (<%= current_user.current_cart.items_count %>)
+  <body class="tutu-body">
+    <div class="tutu-bg"></div>
+    <div class="app-shell">
+      <header class="tutu-header">
+        <nav class="navbar navbar-expand-lg navbar-light tutu-navbar">
+          <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="<%= root_path %>">
+              <span class="brand-mark">TUTU</span>
+              <span class="brand-tagline d-none d-md-inline">Travel booking</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                  <%= link_to "Search", search_path, class: "nav-link" %>
+                </li>
+                <% if user_signed_in? %>
+                  <li class="nav-item">
+                    <%= link_to "My Tickets", tickets_path, class: "nav-link" %>
+                  </li>
+                  <li class="nav-item">
+                    <%= link_to "Orders", orders_path, class: "nav-link" %>
+                  </li>
+                  <li class="nav-item">
+                    <%= link_to "Favorites", favorite_routes_path, class: "nav-link" %>
+                  </li>
                 <% end %>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                  <%= current_user.full_name %>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><%= link_to "Profile", profile_path, class: "dropdown-item" %></li>
-                  <li><%= link_to "Upcoming Trips", upcoming_profile_path, class: "dropdown-item" %></li>
-                  <li><%= link_to "Trip History", trips_profile_path, class: "dropdown-item" %></li>
-                  <% if current_user.admin? %>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><%= link_to "Admin Panel", admin_dashboards_path, class: "dropdown-item" %></li>
-                  <% end %>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "dropdown-item" %></li>
-                </ul>
-              </li>
-            <% else %>
-              <li class="nav-item">
-                <%= link_to "Sign In", new_user_session_path, class: "nav-link" %>
-              </li>
-              <li class="nav-item">
-                <%= link_to "Sign Up", new_user_registration_path, class: "nav-link" %>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-      </div>
-    </nav>
+              </ul>
+              <ul class="navbar-nav">
+                <% if user_signed_in? %>
+                  <li class="nav-item">
+                    <%= link_to cart_path, class: "nav-link" do %>
+                      Cart (<%= current_user.current_cart.items_count %>)
+                    <% end %>
+                  </li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                      <%= current_user.full_name %>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li><%= link_to "Profile", profile_path, class: "dropdown-item" %></li>
+                      <li><%= link_to "Upcoming Trips", upcoming_profile_path, class: "dropdown-item" %></li>
+                      <li><%= link_to "Trip History", trips_profile_path, class: "dropdown-item" %></li>
+                      <% if current_user.admin? %>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><%= link_to "Admin Panel", admin_dashboards_path, class: "dropdown-item" %></li>
+                      <% end %>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "dropdown-item" %></li>
+                    </ul>
+                  </li>
+                <% else %>
+                  <li class="nav-item">
+                    <%= link_to "Sign In", new_user_session_path, class: "nav-link" %>
+                  </li>
+                  <li class="nav-item">
+                    <%= link_to "Sign Up", new_user_registration_path, class: "nav-link" %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </header>
 
-    <div class="container">
-      <% if notice %>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-          <%= notice %>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      <% end %>
-      <% if alert %>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <%= alert %>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      <% end %>
+      <main class="flex-grow-1">
+        <div class="container pb-5">
+          <% if notice %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <%= notice %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% end %>
+          <% if alert %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <%= alert %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% end %>
 
-      <%= yield %>
+          <%= yield %>
+        </div>
+      </main>
+
+      <%= render 'shared/footer' %>
     </div>
-
-    <%= render 'shared/footer' %>
   </body>
 </html>

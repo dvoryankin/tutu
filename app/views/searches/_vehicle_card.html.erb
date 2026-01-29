@@ -1,17 +1,15 @@
 <div class="col-md-6 col-lg-4 mb-3">
-  <div class="card h-100">
+  <div class="card h-100 tutu-vehicle-card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <span class="badge bg-<%= vehicle_badge_color(vehicle) %>"><%= vehicle.class.name %></span>
       <strong><%= vehicle.number %></strong>
     </div>
     <div class="card-body">
-      <h5 class="card-title"><%= vehicle.route&.name || 'No route' %></h5>
-      <p class="card-text">
+      <h5 class="card-title mb-1"><%= vehicle.route&.name || 'No route' %></h5>
+      <p class="card-text text-muted small mb-3">
         <% if @search.start_station && @search.end_station %>
-          <small class="text-muted">
-            Departure: <%= @search.start_station.time(vehicle.route, :departure) || 'N/A' %><br>
-            Arrival: <%= @search.end_station.time(vehicle.route, :arrival) || 'N/A' %>
-          </small>
+          Departure: <%= @search.start_station.time(vehicle.route, :departure) || 'N/A' %><br>
+          Arrival: <%= @search.end_station.time(vehicle.route, :arrival) || 'N/A' %>
         <% end %>
       </p>
       <p class="mb-1">
