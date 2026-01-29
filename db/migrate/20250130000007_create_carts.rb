@@ -1,0 +1,13 @@
+class CreateCarts < ActiveRecord::Migration[7.0]
+  def change
+    create_table :carts do |t|
+      t.references :user, null: false, foreign_key: true
+      t.string :status, default: 'active'
+
+      t.timestamps
+    end
+
+    add_index :carts, :status
+    add_index :carts, [:user_id, :status]
+  end
+end

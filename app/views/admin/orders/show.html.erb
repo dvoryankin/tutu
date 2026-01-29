@@ -1,0 +1,75 @@
+<h1>Order <%= @order.order_number %></h1>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Order Details</h5>
+        <span class="badge bg-<%= order_status_color(@order.status) %> fs-6"><%= @order.status.titleize %></span>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Order Number:</strong> <%= @order.order_number %></p>
+            <p><strong>Created:</strong> <%= @order.created_at.strftime('%d.%m.%Y %H:%M') %></p>
+            <p><strong>Payment Method:</strong> <%= @order.payment_method&.titleize || 'Not paid' %></p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>User:</strong> <%= @order.user.email %></p>
+            <p><strong>Name:</strong> <%= @order.user.full_name %></p>
+            <% if @order.paid_at %>
+              <p><strong>Paid At:</strong> <%= @order.paid_at.strftime('%d.%m.%Y %H:%M') %></p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Tickets</h5>
+      </div>
+      <ul class="list-group list-group-flush">
+        <% @order_items.each do |item| %>
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between">
+              <div>
+                <strong><%= item.ticket.vehicle&.display_name %></strong><br>
+                Route: <%= item.ticket.vehicle&.route&.name %><br>
+                Seat: <%= item.ticket.seat&.full_seat_number %><br>
+                Passenger: <%= item.ticket.passenger_name %> (<%= item.ticket.passenger_passport %>)
+              </div>
+              <div class="text-end">
+                <strong><%= number_to_currency(item.price, unit: 'RUB ') %></strong><br>
+                <span class="badge bg-<%= ticket_status_color(item.ticket.status) %>"><%= item.ticket.status&.titleize || 'Pending' %></span>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+      <div class="card-footer text-end">
+        <strong>Total: <%= number_to_currency(@order.total_amount, unit: 'RUB ') %></strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Actions</h5>
+      </div>
+      <div class="card-body">
+        <% if @order.status == 'pending' %>
+          <%= button_to "Confirm Payment", admin_order_path(@order, action_type: 'confirm'),
+              method: :patch, class: "btn btn-success w-100 mb-2" %>
+        <% end %>
+        <% if @order.status == 'paid' %>
+          <%= button_to "Refund Order", admin_order_path(@order, action_type: 'refund'),
+              method: :patch, class: "btn btn-warning w-100 mb-2",
+              data: { confirm: "Are you sure you want to refund this order?" } %>
+        <% end %>
+        <%= link_to "Back to Orders", admin_orders_path, class: "btn btn-outline-secondary w-100" %>
+      </div>
+    </div>
+  </div>
+</div>

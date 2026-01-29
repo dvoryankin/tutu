@@ -1,0 +1,122 @@
+<h1>Select Your Seat</h1>
+
+<div class="row mb-4">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><%= @vehicle.display_name %> - <%= @vehicle.route&.name %></h5>
+      </div>
+      <div class="card-body">
+        <% @compartments.each do |compartment| %>
+          <div class="mb-4">
+            <h6>
+              <%= compartment.type.to_s.titleize %> #<%= compartment.number %>
+              <span class="badge bg-secondary"><%= compartment.class_type.titleize %></span>
+              <small class="text-muted">(<%= compartment.available_seats_count %>/<%= compartment.total_seats %> available)</small>
+            </h6>
+
+            <div class="seat-map" data-controller="seat-map" data-compartment-id="<%= compartment.id %>">
+              <%= render "#{@vehicle.transport_type}_layout", compartment: compartment %>
+            </div>
+          </div>
+          <hr>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card sticky-top" style="top: 20px;">
+      <div class="card-header">
+        <h5 class="mb-0">Legend</h5>
+      </div>
+      <div class="card-body">
+        <p><span class="seat-demo seat-available"></span> Available</p>
+        <p><span class="seat-demo seat-unavailable"></span> Unavailable</p>
+        <p><span class="seat-demo seat-selected"></span> Selected</p>
+        <hr>
+        <p><strong>Selected Seat:</strong> <span id="selected-seat-info">None</span></p>
+        <p><strong>Price:</strong> <span id="selected-seat-price">-</span></p>
+        <hr>
+        <%= form_tag select_seat_path(0), method: :post, id: "seat-reservation-form", class: "d-none" do %>
+          <input type="hidden" name="seat_id" id="seat_id_input">
+          <div class="mb-3">
+            <label class="form-label">Passenger Name</label>
+            <input type="text" name="passenger_name" class="form-control" value="<%= current_user.full_name %>" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Passport Number</label>
+            <input type="text" name="passenger_passport" class="form-control" value="<%= current_user.passport_number %>" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.seat-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+.seat {
+  width: 35px;
+  height: 35px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.seat.available {
+  background: #d4edda;
+  border-color: #28a745;
+}
+.seat.available:hover {
+  background: #28a745;
+  color: white;
+}
+.seat.unavailable {
+  background: #f8d7da;
+  border-color: #dc3545;
+  cursor: not-allowed;
+}
+.seat.selected {
+  background: #007bff;
+  border-color: #0056b3;
+  color: white;
+}
+.seat-demo {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.seat-demo.seat-available { background: #d4edda; border: 1px solid #28a745; }
+.seat-demo.seat-unavailable { background: #f8d7da; border: 1px solid #dc3545; }
+.seat-demo.seat-selected { background: #007bff; border: 1px solid #0056b3; }
+.seat-row {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+  align-items: center;
+}
+.row-label {
+  width: 25px;
+  font-weight: bold;
+  text-align: center;
+}
+.aisle {
+  width: 20px;
+}
+</style>

@@ -1,0 +1,44 @@
+<h1>Vehicles</h1>
+
+<div class="mb-3">
+  <div class="btn-group">
+    <%= link_to "All", admin_vehicles_path, class: "btn btn-outline-primary #{'active' if params[:type].blank?}" %>
+    <%= link_to "Trains", admin_vehicles_path(type: 'Train'), class: "btn btn-outline-primary #{'active' if params[:type] == 'Train'}" %>
+    <%= link_to "Planes", admin_vehicles_path(type: 'Plane'), class: "btn btn-outline-primary #{'active' if params[:type] == 'Plane'}" %>
+    <%= link_to "Buses", admin_vehicles_path(type: 'Bus'), class: "btn btn-outline-primary #{'active' if params[:type] == 'Bus'}" %>
+  </div>
+  <%= link_to "New Vehicle", new_admin_vehicle_path, class: "btn btn-success float-end" %>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Number</th>
+        <th>Route</th>
+        <th>Current Station</th>
+        <th>Compartments</th>
+        <th>Seats</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @vehicles.each do |vehicle| %>
+        <tr>
+          <td><span class="badge bg-<%= vehicle_badge_color(vehicle) %>"><%= vehicle.type %></span></td>
+          <td><%= vehicle.number %></td>
+          <td><%= vehicle.route&.name || '-' %></td>
+          <td><%= vehicle.current_station&.title || '-' %></td>
+          <td><%= vehicle.compartments.count %></td>
+          <td><%= vehicle.available_seats %>/<%= vehicle.total_seats %></td>
+          <td>
+            <%= link_to "View", admin_vehicle_path(vehicle), class: "btn btn-sm btn-outline-primary" %>
+            <%= link_to "Edit", edit_admin_vehicle_path(vehicle), class: "btn btn-sm btn-outline-secondary" %>
+            <%= link_to "Delete", admin_vehicle_path(vehicle), method: :delete, class: "btn btn-sm btn-outline-danger", data: { confirm: "Are you sure?" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

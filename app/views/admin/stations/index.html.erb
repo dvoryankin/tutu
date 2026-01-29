@@ -1,0 +1,42 @@
+<h1>Stations</h1>
+
+<div class="mb-3">
+  <div class="btn-group">
+    <%= link_to "All", admin_stations_path, class: "btn btn-outline-primary #{'active' if params[:type].blank?}" %>
+    <%= link_to "Railway", admin_stations_path(type: 'RailwayStation'), class: "btn btn-outline-primary #{'active' if params[:type] == 'RailwayStation'}" %>
+    <%= link_to "Airports", admin_stations_path(type: 'Airport'), class: "btn btn-outline-primary #{'active' if params[:type] == 'Airport'}" %>
+    <%= link_to "Bus Stations", admin_stations_path(type: 'BusStation'), class: "btn btn-outline-primary #{'active' if params[:type] == 'BusStation'}" %>
+  </div>
+  <%= link_to "New Station", new_admin_station_path, class: "btn btn-success float-end" %>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Title</th>
+        <th>City</th>
+        <th>Code</th>
+        <th>Routes</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @stations.each do |station| %>
+        <tr>
+          <td><span class="badge bg-<%= station_badge_color(station) %>"><%= station.type %></span></td>
+          <td><%= station.title %></td>
+          <td><%= station.city || '-' %></td>
+          <td><%= station.code || '-' %></td>
+          <td><%= station.routes.count %></td>
+          <td>
+            <%= link_to "View", admin_station_path(station), class: "btn btn-sm btn-outline-primary" %>
+            <%= link_to "Edit", edit_admin_station_path(station), class: "btn btn-sm btn-outline-secondary" %>
+            <%= link_to "Delete", admin_station_path(station), method: :delete, class: "btn btn-sm btn-outline-danger", data: { confirm: "Are you sure?" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

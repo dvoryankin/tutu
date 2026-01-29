@@ -1,0 +1,45 @@
+<h1>Favorite Routes</h1>
+
+<% if @favorites.empty? %>
+  <div class="alert alert-info">
+    You don't have any favorite routes yet. Add routes to favorites from search results.
+  </div>
+<% else %>
+  <div class="row">
+    <% @favorites.each do |favorite| %>
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <% if favorite.transport_type.present? && favorite.transport_type != 'all' %>
+              <span class="badge bg-<%= transport_badge_color(favorite.transport_type) %>">
+                <%= favorite.transport_type.titleize %>
+              </span>
+            <% else %>
+              <span class="badge bg-secondary">All</span>
+            <% end %>
+            <%= button_to favorite_route_path(favorite), method: :delete,
+                class: "btn btn-outline-danger btn-sm",
+                data: { confirm: "Remove from favorites?" } do %>
+              Remove
+            <% end %>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title"><%= favorite.route.name %></h5>
+            <p class="card-text text-muted">
+              Added <%= time_ago_in_words(favorite.created_at) %> ago
+            </p>
+          </div>
+          <div class="card-footer">
+            <%= link_to "Search this route", search_path(
+                search: {
+                  start_station_id: favorite.route.start_station&.id,
+                  end_station_id: favorite.route.end_station&.id,
+                  transport_type: favorite.transport_type
+                }
+              ), class: "btn btn-primary btn-sm" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

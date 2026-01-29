@@ -1,0 +1,44 @@
+<%= form_for [:admin, @compartment] do |f| %>
+  <% if @compartment.errors.any? %>
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        <% @compartment.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-3">
+            <%= f.label :type, class: "form-label" %>
+            <%= f.select :type, ['TrainCompartment', 'AirplaneCabin', 'BusSection'], {}, class: "form-select" %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :class_type, class: "form-label" %>
+            <%= f.select :class_type, ['economy', 'business', 'first', 'coupe', 'lux', 'sitting'], {}, class: "form-select" %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :base_price, class: "form-label" %>
+            <%= f.number_field :base_price, class: "form-control", step: 0.01, min: 0 %>
+          </div>
+
+          <div class="alert alert-info">
+            <small>Seats will be automatically generated based on compartment type and class when created.</small>
+          </div>
+        </div>
+        <div class="card-footer">
+          <%= f.submit "Save", class: "btn btn-primary" %>
+          <% if @vehicle %>
+            <%= link_to "Cancel", admin_vehicle_path(@vehicle), class: "btn btn-outline-secondary" %>
+          <% else %>
+            <%= link_to "Cancel", admin_vehicle_path(@compartment.vehicle), class: "btn btn-outline-secondary" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

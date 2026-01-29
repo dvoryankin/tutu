@@ -1,0 +1,88 @@
+<h1>Order <%= @order.order_number %></h1>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Order Details</h5>
+        <span class="badge bg-<%= order_status_color(@order.status) %>">
+          <%= @order.status.titleize %>
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-6">
+            <strong>Order Date:</strong><br>
+            <%= @order.created_at.strftime('%d.%m.%Y %H:%M') %>
+          </div>
+          <% if @order.paid_at %>
+            <div class="col-6">
+              <strong>Paid At:</strong><br>
+              <%= @order.paid_at.strftime('%d.%m.%Y %H:%M') %>
+            </div>
+          <% end %>
+        </div>
+        <% if @order.payment_method %>
+          <p><strong>Payment Method:</strong> <%= @order.payment_method.titleize %></p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Tickets</h5>
+      </div>
+      <ul class="list-group list-group-flush">
+        <% @order_items.each do |item| %>
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1"><%= item.ticket.vehicle&.display_name %></h6>
+                <p class="mb-1">
+                  <strong>Route:</strong> <%= item.ticket.vehicle&.route&.name %><br>
+                  <strong>Seat:</strong> <%= item.ticket.seat&.full_seat_number %><br>
+                  <strong>Passenger:</strong> <%= item.ticket.passenger_name %><br>
+                  <strong>Passport:</strong> <%= item.ticket.passenger_passport %>
+                </p>
+                <% if item.ticket.departure_time %>
+                  <small class="text-muted">
+                    Departure: <%= item.ticket.departure_time.strftime('%d.%m.%Y %H:%M') %>
+                  </small>
+                <% end %>
+              </div>
+              <div class="text-end">
+                <strong><%= number_to_currency(item.price, unit: 'RUB ') %></strong>
+                <br>
+                <span class="badge bg-<%= ticket_status_color(item.ticket.status) %>">
+                  <%= item.ticket.status&.titleize || 'Pending' %>
+                </span>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card sticky-top" style="top: 20px;">
+      <div class="card-header">
+        <h5 class="mb-0">Summary</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between mb-2">
+          <span>Items:</span>
+          <span><%= @order.order_items.count %></span>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between">
+          <strong>Total:</strong>
+          <strong><%= number_to_currency(@order.total_amount, unit: 'RUB ') %></strong>
+        </div>
+      </div>
+      <div class="card-footer">
+        <%= link_to "Back to Orders", orders_path, class: "btn btn-outline-secondary w-100" %>
+      </div>
+    </div>
+  </div>
+</div>

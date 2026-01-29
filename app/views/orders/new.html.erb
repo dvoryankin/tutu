@@ -1,0 +1,76 @@
+<h1>Payment</h1>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Payment Details</h5>
+      </div>
+      <div class="card-body">
+        <%= form_tag orders_path, method: :post, id: "payment-form", data: { controller: "payment" } do %>
+          <%= hidden_field_tag :order_id, @order.id %>
+
+          <div class="mb-4">
+            <label class="form-label">Payment Method</label>
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="payment_method" id="pm_card" value="card" checked>
+              <label class="btn btn-outline-primary" for="pm_card">Credit Card</label>
+
+              <input type="radio" class="btn-check" name="payment_method" id="pm_bank" value="bank_transfer">
+              <label class="btn btn-outline-primary" for="pm_bank">Bank Transfer</label>
+
+              <input type="radio" class="btn-check" name="payment_method" id="pm_cash" value="cash">
+              <label class="btn btn-outline-primary" for="pm_cash">Cash</label>
+            </div>
+          </div>
+
+          <div id="card-details">
+            <div class="mb-3">
+              <label class="form-label">Card Number</label>
+              <input type="text" name="card_number" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+            </div>
+            <div class="row">
+              <div class="col-6 mb-3">
+                <label class="form-label">Expiry Date</label>
+                <input type="text" name="card_expiry" class="form-control" placeholder="MM/YY" maxlength="5">
+              </div>
+              <div class="col-6 mb-3">
+                <label class="form-label">CVV</label>
+                <input type="text" name="card_cvv" class="form-control" placeholder="123" maxlength="4">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Cardholder Name</label>
+              <input type="text" name="cardholder_name" class="form-control" placeholder="John Doe">
+            </div>
+          </div>
+
+          <div class="alert alert-info">
+            <small>This is a demo payment form. Use any valid-looking card number for testing.</small>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-100">
+            Pay <%= number_to_currency(@order.total_amount, unit: 'RUB ') %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Order Summary</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Order:</strong> <%= @order.order_number %></p>
+        <p><strong>Items:</strong> <%= @order.order_items.count %></p>
+        <hr>
+        <div class="d-flex justify-content-between">
+          <strong>Total:</strong>
+          <strong><%= number_to_currency(@order.total_amount, unit: 'RUB ') %></strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

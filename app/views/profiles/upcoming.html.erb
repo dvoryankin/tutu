@@ -1,0 +1,35 @@
+<h1>Upcoming Trips</h1>
+
+<% if @trips.empty? %>
+  <div class="alert alert-info">
+    You don't have any upcoming trips. <%= link_to "Search for tickets", search_path %> to book your next adventure.
+  </div>
+<% else %>
+  <div class="row">
+    <% @trips.each do |ticket| %>
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 border-primary">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span class="badge bg-light text-dark"><%= ticket.vehicle&.class&.name || 'Train' %></span>
+            <strong><%= ticket.departure_time&.strftime('%d.%m.%Y %H:%M') %></strong>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title"><%= ticket.route_name %></h5>
+            <p class="card-text">
+              <strong>Vehicle:</strong> <%= ticket.vehicle&.display_name %><br>
+              <strong>Seat:</strong> <%= ticket.seat&.full_seat_number %><br>
+              <strong>Passenger:</strong> <%= ticket.passenger_name %><br>
+              <strong>Passport:</strong> <%= ticket.passenger_passport %>
+            </p>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="badge bg-success">Confirmed</span>
+            <small class="text-muted">
+              <%= number_to_currency(ticket.price, unit: 'RUB ') %>
+            </small>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

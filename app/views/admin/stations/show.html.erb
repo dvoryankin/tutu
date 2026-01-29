@@ -1,0 +1,42 @@
+<h1><%= @station.title %></h1>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Station Details</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Type:</strong> <span class="badge bg-<%= station_badge_color(@station) %>"><%= @station.type %></span></p>
+        <p><strong>Title:</strong> <%= @station.title %></p>
+        <p><strong>City:</strong> <%= @station.city || 'Not set' %></p>
+        <p><strong>Code:</strong> <%= @station.code || 'Not set' %></p>
+      </div>
+      <div class="card-footer">
+        <%= link_to "Edit", edit_admin_station_path(@station), class: "btn btn-primary" %>
+        <%= link_to "Back", admin_stations_path, class: "btn btn-outline-secondary" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Routes</h5>
+      </div>
+      <ul class="list-group list-group-flush">
+        <% @routes.each do |route| %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <%= route.name %><br>
+              <small class="text-muted">
+                Position: <%= @station.position_in(route) || 'N/A' %>
+              </small>
+            </div>
+            <%= link_to "View Route", admin_route_path(route), class: "btn btn-sm btn-outline-primary" %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>

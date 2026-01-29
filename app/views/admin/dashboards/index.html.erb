@@ -1,10 +1,101 @@
-<h1>Dashboard</h1>
+<h1>Admin Dashboard</h1>
 
-<div>
-  <ul>
-    <li><%= link_to t('admin.railway_stations.list'), admin_railway_stations_path %></li>
-    <li><%= link_to t('admin.routes.list'), admin_routes_path %></li>
-    <li><%= link_to t('admin.trains.list'), admin_trains_path %></li>
-    <li><%= link_to t('admin.tickets.list'), admin_tickets_path %></li>
-  </ul>
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <h5 class="card-title">Users</h5>
+        <h2><%= User.count %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <h5 class="card-title">Orders</h5>
+        <h2><%= Order.count %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <h5 class="card-title">Vehicles</h5>
+        <h2><%= Vehicle.count %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <h5 class="card-title">Stations</h5>
+        <h2><%= Station.count + RailwayStation.count %></h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Quick Links</h5>
+      </div>
+      <div class="list-group list-group-flush">
+        <div class="list-group-item list-group-item-action">
+          <strong>Legacy System</strong>
+        </div>
+        <%= link_to admin_railway_stations_path, class: "list-group-item list-group-item-action" do %>
+          Railway Stations
+        <% end %>
+        <%= link_to admin_routes_path, class: "list-group-item list-group-item-action" do %>
+          Routes
+        <% end %>
+        <%= link_to admin_trains_path, class: "list-group-item list-group-item-action" do %>
+          Trains
+        <% end %>
+
+        <div class="list-group-item list-group-item-action">
+          <strong>New System</strong>
+        </div>
+        <%= link_to admin_stations_path, class: "list-group-item list-group-item-action" do %>
+          All Stations (New)
+        <% end %>
+        <%= link_to admin_vehicles_path, class: "list-group-item list-group-item-action" do %>
+          All Vehicles (New)
+        <% end %>
+        <%= link_to admin_orders_path, class: "list-group-item list-group-item-action" do %>
+          Orders
+        <% end %>
+        <%= link_to admin_tickets_path, class: "list-group-item list-group-item-action" do %>
+          Tickets
+        <% end %>
+        <%= link_to admin_statistics_path, class: "list-group-item list-group-item-action" do %>
+          Statistics
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent Orders</h5>
+      </div>
+      <ul class="list-group list-group-flush">
+        <% Order.recent.limit(5).each do |order| %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong><%= order.order_number %></strong><br>
+              <small class="text-muted"><%= order.user.email %></small>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-<%= order_status_color(order.status) %>"><%= order.status %></span><br>
+              <small><%= number_to_currency(order.total_amount, unit: 'RUB ') %></small>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
 </div>

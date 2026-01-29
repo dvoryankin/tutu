@@ -1,0 +1,111 @@
+<h1>Statistics</h1>
+
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <h5 class="card-title">Total Users</h5>
+        <h2><%= @total_users %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <h5 class="card-title">Total Orders</h5>
+        <h2><%= @total_orders %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <h5 class="card-title">Total Revenue</h5>
+        <h2><%= number_to_currency(@total_revenue, unit: 'RUB ', precision: 0) %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <h5 class="card-title">Confirmed Tickets</h5>
+        <h2><%= @confirmed_tickets %> / <%= @total_tickets %></h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Orders by Status</h5>
+      </div>
+      <div class="card-body">
+        <% @orders_by_status.each do |status, count| %>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="badge bg-<%= order_status_color(status) %>"><%= status.titleize %></span>
+            <strong><%= count %></strong>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Tickets by Status</h5>
+      </div>
+      <div class="card-body">
+        <% @tickets_by_status.each do |status, count| %>
+          <% next if status.nil? %>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="badge bg-<%= ticket_status_color(status) %>"><%= status.titleize %></span>
+            <strong><%= count %></strong>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent Orders</h5>
+      </div>
+      <ul class="list-group list-group-flush">
+        <% @recent_orders.each do |order| %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong><%= order.order_number %></strong><br>
+              <small class="text-muted"><%= order.user.email %></small>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-<%= order_status_color(order.status) %>"><%= order.status %></span><br>
+              <small><%= number_to_currency(order.total_amount, unit: 'RUB ') %></small>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Popular Routes</h5>
+      </div>
+      <ul class="list-group list-group-flush">
+        <% @popular_routes.each do |route| %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <%= route.name %>
+            <span class="badge bg-primary rounded-pill"><%= route.vehicles.count %> vehicles</span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>

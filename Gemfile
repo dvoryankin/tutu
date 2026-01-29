@@ -29,7 +29,9 @@ gem 'devise'
 
 # gem 'execjs'
 # gem 'therubyracer'
-gem 'twitter-bootstrap-rails'
+# gem 'twitter-bootstrap-rails'
+
+gem 'bootstrap', '>=5.2.3'
 
 gem 'rails_12factor'
 gem 'postmark-rails', '>=0.10.0'
@@ -38,6 +40,18 @@ gem 'pry-rails'
 gem 'faker'
 
 gem 'awesome_print'
+
+# Pagination
+gem 'pagy'
+
+# Authorization
+gem 'pundit'
+
+# CORS for API
+gem 'rack-cors'
+
+# Background jobs
+gem 'sidekiq'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

@@ -1,0 +1,37 @@
+<h1>Compartments for <%= @vehicle.display_name %></h1>
+
+<div class="mb-3">
+  <%= link_to "Add Compartment", new_admin_vehicle_compartment_path(@vehicle), class: "btn btn-success" %>
+  <%= link_to "Back to Vehicle", admin_vehicle_path(@vehicle), class: "btn btn-outline-secondary" %>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Type</th>
+        <th>Class</th>
+        <th>Seats</th>
+        <th>Base Price</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @compartments.each do |compartment| %>
+        <tr>
+          <td><%= compartment.number %></td>
+          <td><%= compartment.type %></td>
+          <td><span class="badge bg-secondary"><%= compartment.class_type.titleize %></span></td>
+          <td><%= compartment.available_seats_count %>/<%= compartment.total_seats %></td>
+          <td><%= number_to_currency(compartment.base_price, unit: 'RUB ') %></td>
+          <td>
+            <%= link_to "View", admin_compartment_path(compartment), class: "btn btn-sm btn-outline-primary" %>
+            <%= link_to "Edit", edit_admin_compartment_path(compartment), class: "btn btn-sm btn-outline-secondary" %>
+            <%= link_to "Delete", admin_compartment_path(compartment), method: :delete, class: "btn btn-sm btn-outline-danger", data: { confirm: "Are you sure?" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

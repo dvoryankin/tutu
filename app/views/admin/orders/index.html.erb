@@ -1,0 +1,45 @@
+<h1>Orders</h1>
+
+<div class="mb-3">
+  <div class="btn-group">
+    <%= link_to "All", admin_orders_path, class: "btn btn-outline-primary #{'active' if params[:status].blank?}" %>
+    <%= link_to "Pending", admin_orders_path(status: 'pending'), class: "btn btn-outline-warning #{'active' if params[:status] == 'pending'}" %>
+    <%= link_to "Paid", admin_orders_path(status: 'paid'), class: "btn btn-outline-success #{'active' if params[:status] == 'paid'}" %>
+    <%= link_to "Failed", admin_orders_path(status: 'failed'), class: "btn btn-outline-danger #{'active' if params[:status] == 'failed'}" %>
+    <%= link_to "Refunded", admin_orders_path(status: 'refunded'), class: "btn btn-outline-secondary #{'active' if params[:status] == 'refunded'}" %>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Order #</th>
+        <th>User</th>
+        <th>Date</th>
+        <th>Items</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td><%= order.order_number %></td>
+          <td>
+            <%= order.user.email %><br>
+            <small class="text-muted"><%= order.user.full_name %></small>
+          </td>
+          <td><%= order.created_at.strftime('%d.%m.%Y %H:%M') %></td>
+          <td><%= order.order_items.count %></td>
+          <td><%= number_to_currency(order.total_amount, unit: 'RUB ') %></td>
+          <td><span class="badge bg-<%= order_status_color(order.status) %>"><%= order.status.titleize %></span></td>
+          <td>
+            <%= link_to "View", admin_order_path(order), class: "btn btn-sm btn-outline-primary" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

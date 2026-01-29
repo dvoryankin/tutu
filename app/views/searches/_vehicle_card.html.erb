@@ -1,0 +1,33 @@
+<div class="col-md-6 col-lg-4 mb-3">
+  <div class="card h-100">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="badge bg-<%= vehicle_badge_color(vehicle) %>"><%= vehicle.class.name %></span>
+      <strong><%= vehicle.number %></strong>
+    </div>
+    <div class="card-body">
+      <h5 class="card-title"><%= vehicle.route&.name || 'No route' %></h5>
+      <p class="card-text">
+        <% if @search.start_station && @search.end_station %>
+          <small class="text-muted">
+            Departure: <%= @search.start_station.time(vehicle.route, :departure) || 'N/A' %><br>
+            Arrival: <%= @search.end_station.time(vehicle.route, :arrival) || 'N/A' %>
+          </small>
+        <% end %>
+      </p>
+      <p class="mb-1">
+        <small>Available seats: <%= vehicle.available_seats %> / <%= vehicle.total_seats %></small>
+      </p>
+    </div>
+    <div class="card-footer">
+      <% if user_signed_in? %>
+        <%= link_to "Select Seats", vehicle_seats_path(vehicle), class: "btn btn-primary btn-sm" %>
+        <% if vehicle.route %>
+          <%= button_to "Add to Favorites", favorite_routes_path(route_id: vehicle.route.id, transport_type: vehicle.transport_type),
+                method: :post, class: "btn btn-outline-secondary btn-sm" %>
+        <% end %>
+      <% else %>
+        <%= link_to "Sign in to book", new_user_session_path, class: "btn btn-outline-primary btn-sm" %>
+      <% end %>
+    </div>
+  </div>
+</div>

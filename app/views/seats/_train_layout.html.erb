@@ -1,0 +1,20 @@
+<div class="train-compartment">
+  <% compartment.seats.order(:row, :position).group_by(&:row).each do |row, seats| %>
+    <div class="seat-row">
+      <span class="row-label"><%= row %></span>
+      <% seats.each_with_index do |seat, index| %>
+        <% if index == 2 && compartment.class_type == 'economy' %>
+          <span class="aisle"></span>
+        <% end %>
+        <div class="seat <%= seat.available? ? 'available' : 'unavailable' %>"
+             data-seat-id="<%= seat.id %>"
+             data-seat-number="<%= seat.seat_number %>"
+             data-seat-type="<%= seat.seat_type %>"
+             data-price="<%= seat.price(compartment.base_price_for_class) %>"
+             title="<%= seat.seat_type.titleize %> - <%= number_to_currency(seat.price(compartment.base_price_for_class), unit: 'RUB ') %>">
+          <%= seat.seat_number %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

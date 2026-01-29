@@ -1,0 +1,15 @@
+class CartItem < ApplicationRecord
+  belongs_to :cart
+  belongs_to :ticket
+
+  validates :ticket_id, uniqueness: { scope: :cart_id, message: 'already in cart' }
+  validates :price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+
+  before_save :set_price
+
+  private
+
+  def set_price
+    self.price ||= ticket.price
+  end
+end

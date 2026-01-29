@@ -1,0 +1,61 @@
+<h1>Compartment #<%= @compartment.number %></h1>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Compartment Details</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Vehicle:</strong> <%= @compartment.vehicle.display_name %></p>
+        <p><strong>Number:</strong> <%= @compartment.number %></p>
+        <p><strong>Type:</strong> <%= @compartment.type %></p>
+        <p><strong>Class:</strong> <span class="badge bg-secondary"><%= @compartment.class_type.titleize %></span></p>
+        <p><strong>Base Price:</strong> <%= number_to_currency(@compartment.base_price, unit: 'RUB ') %></p>
+        <p><strong>Total Seats:</strong> <%= @compartment.total_seats %></p>
+        <p><strong>Available:</strong> <%= @compartment.available_seats_count %></p>
+      </div>
+      <div class="card-footer">
+        <%= link_to "Edit", edit_admin_compartment_path(@compartment), class: "btn btn-primary" %>
+        <%= link_to "Back", admin_vehicle_path(@compartment.vehicle), class: "btn btn-outline-secondary" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Seats</h5>
+      </div>
+      <div class="card-body">
+        <div class="seat-map">
+          <% @seats.group_by(&:row).each do |row, seats| %>
+            <div class="seat-row mb-2">
+              <span class="row-label"><%= row %></span>
+              <% seats.each do |seat| %>
+                <div class="seat <%= seat.available? ? 'available' : 'unavailable' %>"
+                     title="<%= seat.seat_type %> - <%= number_to_currency(seat.price(@compartment.base_price_for_class), unit: 'RUB ') %>">
+                  <%= seat.seat_number %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.seat-map { padding: 10px; }
+.seat-row { display: flex; gap: 5px; align-items: center; }
+.row-label { width: 25px; font-weight: bold; }
+.seat {
+  width: 35px; height: 35px;
+  border: 2px solid #ccc; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+}
+.seat.available { background: #d4edda; border-color: #28a745; }
+.seat.unavailable { background: #f8d7da; border-color: #dc3545; }
+</style>

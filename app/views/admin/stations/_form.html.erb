@@ -1,0 +1,40 @@
+<%= form_for [:admin, @station] do |f| %>
+  <% if @station.errors.any? %>
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        <% @station.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-3">
+            <%= f.label :type, class: "form-label" %>
+            <%= f.select :type, ['RailwayStation', 'Airport', 'BusStation'], {}, class: "form-select" %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :title, class: "form-label" %>
+            <%= f.text_field :title, class: "form-control" %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :city, class: "form-label" %>
+            <%= f.text_field :city, class: "form-control" %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :code, "Code (IATA for airports)", class: "form-label" %>
+            <%= f.text_field :code, class: "form-control", maxlength: 3 %>
+          </div>
+        </div>
+        <div class="card-footer">
+          <%= f.submit "Save", class: "btn btn-primary" %>
+          <%= link_to "Cancel", admin_stations_path, class: "btn btn-outline-secondary" %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

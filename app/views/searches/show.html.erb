@@ -1,14 +1,60 @@
 <h1>Search Tickets</h1>
 
-<div class="row">
+<div class="row mb-4">
   <%= render 'form' %>
 </div>
 
-<div class="row">
-  <div class="col-md-12">
-  <% if @search.result.present? %>
-    <h2>Search results:</h2>
-    <%= render 'result' %>
-  <% end %>
+<% if @search.result.present? %>
+  <div class="row">
+    <div class="col-12">
+      <h2>Search Results</h2>
+
+      <% if @search.transport_type == 'all' %>
+        <!-- Grouped results by transport type -->
+        <ul class="nav nav-tabs mb-3" id="transportTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">
+              All (<%= @search.result.count %>)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="trains-tab" data-bs-toggle="tab" data-bs-target="#trains" type="button">
+              Trains (<%= @search.trains_result&.count || 0 %>)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="planes-tab" data-bs-toggle="tab" data-bs-target="#planes" type="button">
+              Planes (<%= @search.planes_result&.count || 0 %>)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="buses-tab" data-bs-toggle="tab" data-bs-target="#buses" type="button">
+              Buses (<%= @search.buses_result&.count || 0 %>)
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="transportTabsContent">
+          <div class="tab-pane fade show active" id="all" role="tabpanel">
+            <%= render 'results', vehicles: @search.result %>
+          </div>
+          <div class="tab-pane fade" id="trains" role="tabpanel">
+            <%= render 'results', vehicles: @search.trains_result || [] %>
+          </div>
+          <div class="tab-pane fade" id="planes" role="tabpanel">
+            <%= render 'results', vehicles: @search.planes_result || [] %>
+          </div>
+          <div class="tab-pane fade" id="buses" role="tabpanel">
+            <%= render 'results', vehicles: @search.buses_result || [] %>
+          </div>
+        </div>
+      <% else %>
+        <%= render 'results', vehicles: @search.result %>
+      <% end %>
+    </div>
   </div>
-</div>
+<% elsif @search.start_station_id.present? %>
+  <div class="alert alert-info">
+    No results found for your search. Try different stations or dates.
+  </div>
+<% end %>

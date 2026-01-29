@@ -1,19 +1,23 @@
-<%= form_for @search, url: { action: 'show' } do |f| %>
-<div class="col-md-4">
-  <div class="field">
-    <%= f.label :start_station_id, t('.start_station') %>
-    <%= f.collection_select :start_station_id, RailwayStation.all, :id, :title, {}, class: "form-control" %>
+<%= form_for @search, url: search_path, method: :post do |f| %>
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label">Transport Type</label>
+      <%= f.select :transport_type, options_for_select(@transport_types.map { |t| [t.titleize, t] }, @search.transport_type), {}, class: "form-select" %>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">From</label>
+      <%= f.collection_select :start_station_id, @stations, :id, :title, { prompt: "Select station" }, class: "form-select" %>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">To</label>
+      <%= f.collection_select :end_station_id, @stations, :id, :title, { prompt: "Select station" }, class: "form-select" %>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Date</label>
+      <%= f.date_field :date, class: "form-control", value: @search.date || Date.today %>
+    </div>
+    <div class="col-md-1">
+      <%= f.submit "Search", class: "btn btn-primary w-100" %>
+    </div>
   </div>
-</div>
-<div class="col-md-4">
-  <div class="field">
-    <%= f.label :end_station_id, t('.end_station') %>
-    <%= f.collection_select :end_station_id, RailwayStation.all, :id, :title, {}, class: "form-control" %>
-  </div>
-</div>
-<div class="col-md-4">
-  <div class="actions actions-find">
-    <%= f.submit t('.submit'), class: "btn btn-primary form-control find" %>
-  </div>
-</div>
 <% end %>

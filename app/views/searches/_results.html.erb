@@ -1,0 +1,9 @@
+<% if vehicles.any? %>
+  <div class="row">
+    <% vehicles.each do |vehicle| %>
+      <%= render 'vehicle_card', vehicle: vehicle %>
+    <% end %>
+  </div>
+<% else %>
+  <p class="text-muted">No vehicles found.</p>
+<% end %>

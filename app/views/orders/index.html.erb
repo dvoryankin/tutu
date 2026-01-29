@@ -1,0 +1,43 @@
+<h1>My Orders</h1>
+
+<% if @orders.empty? %>
+  <div class="alert alert-info">
+    You don't have any orders yet. <%= link_to "Search for tickets", search_path %> to start booking.
+  </div>
+<% else %>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Date</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @orders.each do |order| %>
+          <tr>
+            <td><%= order.order_number %></td>
+            <td><%= order.created_at.strftime('%d.%m.%Y %H:%M') %></td>
+            <td><%= order.order_items.count %></td>
+            <td><%= number_to_currency(order.total_amount, unit: 'RUB ') %></td>
+            <td>
+              <span class="badge bg-<%= order_status_color(order.status) %>">
+                <%= order.status.titleize %>
+              </span>
+            </td>
+            <td>
+              <%= link_to "View", order_path(order), class: "btn btn-outline-primary btn-sm" %>
+              <% unless order.paid? %>
+                <%= link_to "Pay", new_order_path(order_id: order.id), class: "btn btn-success btn-sm" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

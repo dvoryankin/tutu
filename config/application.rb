@@ -13,5 +13,7 @@ module Tutu
     # -- all .rb files in that directory are automatically loaded.
     #config.autoload_paths += %W(#{config.root}/app/models)
     config.i18n.default_locale = :ru
+    config.assets.enabled = true
+    config.assets.version = '1.0'
   end
 end

@@ -1,0 +1,33 @@
+<h1>Trip History</h1>
+
+<% if @trips.empty? %>
+  <div class="alert alert-info">
+    You don't have any past trips. <%= link_to "Search for tickets", search_path %> to start traveling.
+  </div>
+<% else %>
+  <div class="row">
+    <% @trips.each do |ticket| %>
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="badge bg-secondary"><%= ticket.vehicle&.class&.name || 'Train' %></span>
+            <small class="text-muted"><%= ticket.departure_time&.strftime('%d.%m.%Y') %></small>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title"><%= ticket.route_name %></h5>
+            <p class="card-text">
+              <strong>Vehicle:</strong> <%= ticket.vehicle&.display_name %><br>
+              <strong>Seat:</strong> <%= ticket.seat&.full_seat_number %><br>
+              <strong>Passenger:</strong> <%= ticket.passenger_name %>
+            </p>
+          </div>
+          <div class="card-footer">
+            <small class="text-muted">
+              Price: <%= number_to_currency(ticket.price, unit: 'RUB ') %>
+            </small>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
