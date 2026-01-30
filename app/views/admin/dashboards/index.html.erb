@@ -1,35 +1,74 @@
-<h1>Admin Dashboard</h1>
+<h1 class="mb-4">Admin Dashboard</h1>
 
 <div class="row mb-4">
   <div class="col-md-3">
     <div class="card text-white bg-primary">
       <div class="card-body">
-        <h5 class="card-title">Users</h5>
-        <h2><%= User.count %></h2>
+        <h5 class="card-title">Tickets</h5>
+        <h2><%= number_with_delimiter(Ticket.count) %></h2>
+        <small>Total in system</small>
       </div>
     </div>
   </div>
   <div class="col-md-3">
     <div class="card text-white bg-success">
       <div class="card-body">
-        <h5 class="card-title">Orders</h5>
-        <h2><%= Order.count %></h2>
+        <h5 class="card-title">Vehicles</h5>
+        <h2><%= Vehicle.count %></h2>
+        <small><%= Train.count %> trains, <%= Plane.count %> planes, <%= Bus.count %> buses</small>
       </div>
     </div>
   </div>
   <div class="col-md-3">
     <div class="card text-white bg-info">
       <div class="card-body">
-        <h5 class="card-title">Vehicles</h5>
-        <h2><%= Vehicle.count %></h2>
+        <h5 class="card-title">Stations</h5>
+        <h2><%= Station.count %></h2>
+        <small><%= Station.where(type: 'RailwayStation').count %> rail, <%= Airport.count %> air, <%= BusStation.count %> bus</small>
       </div>
     </div>
   </div>
   <div class="col-md-3">
     <div class="card text-white bg-warning">
       <div class="card-body">
-        <h5 class="card-title">Stations</h5>
-        <h2><%= Station.count + RailwayStation.count %></h2>
+        <h5 class="card-title">Routes</h5>
+        <h2><%= Route.count %></h2>
+        <small>Active routes</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card bg-light">
+      <div class="card-body text-center">
+        <h6 class="text-muted">Today's Departures</h6>
+        <h3 class="text-primary"><%= Ticket.where(departure_time: Date.today.beginning_of_day..Date.today.end_of_day).count %></h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-light">
+      <div class="card-body text-center">
+        <h6 class="text-muted">This Week</h6>
+        <h3 class="text-success"><%= Ticket.where(departure_time: Date.today.beginning_of_day..(Date.today + 7.days).end_of_day).count %></h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-light">
+      <div class="card-body text-center">
+        <h6 class="text-muted">Users</h6>
+        <h3 class="text-info"><%= User.count %></h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-light">
+      <div class="card-body text-center">
+        <h6 class="text-muted">Orders</h6>
+        <h3 class="text-warning"><%= Order.count %></h3>
       </div>
     </div>
   </div>
@@ -37,65 +76,137 @@
 
 <div class="row">
   <div class="col-md-6">
-    <div class="card">
-      <div class="card-header">
-        <h5 class="mb-0">Quick Links</h5>
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Popular Routes (by tickets)</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Route</th>
+              <th>Type</th>
+              <th class="text-end">Tickets</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% popular_routes = Vehicle.includes(:route)
+                 .joins(:tickets)
+                 .group('vehicles.id', 'vehicles.type', 'vehicles.route_id')
+                 .order('COUNT(tickets.id) DESC')
+                 .limit(10)
+                 .count('tickets.id') %>
+            <% popular_routes.each do |(vehicle_id, vehicle_type, route_id), count| %>
+              <% route = Route.find_by(id: route_id) %>
+              <% next unless route %>
+              <tr>
+                <td><%= route.name %></td>
+                <td><span class="badge bg-<%= transport_badge_color(vehicle_type.underscore) %>"><%= vehicle_type %></span></td>
+                <td class="text-end"><%= count %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Upcoming Departures (next 24h)</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Vehicle</th>
+              <th>Route</th>
+              <th>Departure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% upcoming = Ticket.includes(vehicle: :route)
+                 .where(departure_time: Time.current..(Time.current + 24.hours))
+                 .order(:departure_time)
+                 .limit(10) %>
+            <% upcoming.each do |ticket| %>
+              <% next unless ticket.vehicle %>
+              <tr>
+                <td>
+                  <span class="badge bg-<%= vehicle_badge_color(ticket.vehicle) %>"><%= ticket.vehicle.class.name %></span>
+                  <%= ticket.vehicle.number %>
+                </td>
+                <td><%= ticket.vehicle.route&.name || 'N/A' %></td>
+                <td><%= ticket.departure_time.strftime('%H:%M') %></td>
+              </tr>
+            <% end %>
+            <% if upcoming.empty? %>
+              <tr><td colspan="3" class="text-muted text-center">No departures in next 24 hours</td></tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Quick Actions</h5>
       </div>
       <div class="list-group list-group-flush">
-        <div class="list-group-item list-group-item-action">
-          <strong>Legacy System</strong>
-        </div>
-        <%= link_to admin_railway_stations_path, class: "list-group-item list-group-item-action" do %>
-          Railway Stations
+        <%= link_to admin_stations_path, class: "list-group-item list-group-item-action d-flex justify-content-between" do %>
+          <span>Manage Stations</span>
+          <span class="badge bg-secondary"><%= Station.count %></span>
         <% end %>
-        <%= link_to admin_routes_path, class: "list-group-item list-group-item-action" do %>
-          Routes
+        <%= link_to admin_routes_path, class: "list-group-item list-group-item-action d-flex justify-content-between" do %>
+          <span>Manage Routes</span>
+          <span class="badge bg-secondary"><%= Route.count %></span>
         <% end %>
-        <%= link_to admin_trains_path, class: "list-group-item list-group-item-action" do %>
-          Trains
+        <%= link_to admin_vehicles_path, class: "list-group-item list-group-item-action d-flex justify-content-between" do %>
+          <span>Manage Vehicles</span>
+          <span class="badge bg-secondary"><%= Vehicle.count %></span>
         <% end %>
-
-        <div class="list-group-item list-group-item-action">
-          <strong>New System</strong>
-        </div>
-        <%= link_to admin_stations_path, class: "list-group-item list-group-item-action" do %>
-          All Stations (New)
+        <%= link_to admin_tickets_path, class: "list-group-item list-group-item-action d-flex justify-content-between" do %>
+          <span>Manage Tickets</span>
+          <span class="badge bg-secondary"><%= number_with_delimiter(Ticket.count) %></span>
         <% end %>
-        <%= link_to admin_vehicles_path, class: "list-group-item list-group-item-action" do %>
-          All Vehicles (New)
-        <% end %>
-        <%= link_to admin_orders_path, class: "list-group-item list-group-item-action" do %>
-          Orders
-        <% end %>
-        <%= link_to admin_tickets_path, class: "list-group-item list-group-item-action" do %>
-          Tickets
-        <% end %>
-        <%= link_to admin_statistics_path, class: "list-group-item list-group-item-action" do %>
-          Statistics
+        <%= link_to admin_orders_path, class: "list-group-item list-group-item-action d-flex justify-content-between" do %>
+          <span>Manage Orders</span>
+          <span class="badge bg-secondary"><%= Order.count %></span>
         <% end %>
       </div>
     </div>
   </div>
 
   <div class="col-md-6">
-    <div class="card">
-      <div class="card-header">
+    <div class="card mb-4">
+      <div class="card-header bg-warning">
         <h5 class="mb-0">Recent Orders</h5>
       </div>
-      <ul class="list-group list-group-flush">
-        <% Order.recent.limit(5).each do |order| %>
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <strong><%= order.order_number %></strong><br>
-              <small class="text-muted"><%= order.user.email %></small>
-            </div>
-            <div class="text-end">
-              <span class="badge bg-<%= order_status_color(order.status) %>"><%= order.status %></span><br>
-              <small><%= number_to_currency(order.total_amount, unit: 'RUB ') %></small>
-            </div>
-          </li>
-        <% end %>
-      </ul>
+      <% if Order.any? %>
+        <ul class="list-group list-group-flush">
+          <% Order.recent.limit(5).each do |order| %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong><%= order.order_number %></strong><br>
+                <small class="text-muted"><%= order.user&.email %></small>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-<%= order_status_color(order.status) %>"><%= order.status %></span><br>
+                <small><%= number_to_currency(order.total_amount, unit: '₽', format: '%n %u') %></small>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="card-body text-center text-muted">
+          <p class="mb-0">No orders yet</p>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>
