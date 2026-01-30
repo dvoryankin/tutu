@@ -2,15 +2,16 @@
   <div class="row g-3 align-items-end">
     <div class="col-md-3">
       <label class="form-label">Transport Type</label>
-      <%= f.select :transport_type, options_for_select(@transport_types.map { |t| [t.titleize, t] }, @search.transport_type), {}, class: "form-select" %>
+      <%= f.select :transport_type, options_for_select(@transport_types.map { |t| [t.titleize, t] }, @search.transport_type), {}, class: "form-select", data: { transport_select: true } %>
     </div>
     <div class="col-md-3">
       <label class="form-label">From</label>
-      <%= f.collection_select :start_station_id, @stations, :id, :title, { prompt: "Select station" }, class: "form-select" %>
+      <% station_options = @stations.map { |station| [station.display_name, station.id, { 'data-station-type': station.type }] } %>
+      <%= f.select :start_station_id, options_for_select(station_options, @search.start_station_id), { prompt: "Select station" }, class: "form-select", data: { station_select: true } %>
     </div>
     <div class="col-md-3">
       <label class="form-label">To</label>
-      <%= f.collection_select :end_station_id, @stations, :id, :title, { prompt: "Select station" }, class: "form-select" %>
+      <%= f.select :end_station_id, options_for_select(station_options, @search.end_station_id), { prompt: "Select station" }, class: "form-select", data: { station_select: true } %>
     </div>
     <div class="col-md-2">
       <label class="form-label">Date</label>

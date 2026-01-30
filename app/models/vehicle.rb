@@ -18,6 +18,11 @@ class Vehicle < ApplicationRecord
     end
   end
 
+  # Override polymorphic_name to use actual STI type for polymorphic associations
+  def self.polymorphic_name
+    name
+  end
+
   def transport_type
     self.class.name.underscore
   end

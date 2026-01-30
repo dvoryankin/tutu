@@ -1,10 +1,12 @@
 # TUTU Multimodal Transport Booking System - Seed Data
 # Run with: rails db:seed
 
+require 'securerandom'
+
 puts "Seeding database..."
 
-# Clear existing data (optional - comment out in production)
-# Order matters due to foreign keys
+ActionMailer::Base.perform_deliveries = false
+
 puts "Clearing existing data..."
 CartItem.destroy_all
 Cart.destroy_all
@@ -13,234 +15,269 @@ Order.destroy_all
 Ticket.destroy_all
 Seat.destroy_all
 Compartment.destroy_all
+Carriage.destroy_all
 Vehicle.destroy_all
 StationsRoute.destroy_all
+RailwayStationsRoute.destroy_all
+Route.destroy_all
 FavoriteRoute.destroy_all
 ApiToken.destroy_all
+Station.destroy_all
+RailwayStation.destroy_all
+
+TARGETS = {
+  railway_stations: 40,
+  airports: 28,
+  bus_stations: 30,
+  train_routes: 60,
+  flight_routes: 60,
+  bus_routes: 60,
+  trains: 100,
+  planes: 100,
+  buses: 100,
+  schedule_days: 90
+}.freeze
+
+def ensure_route(name)
+  route = Route.find_or_initialize_by(name: name)
+  route.save!(validate: false) if route.new_record?
+  route
+end
+
+def attach_stations(route, stations, legacy_map: nil)
+  stations.each_with_index do |station, index|
+    StationsRoute.find_or_create_by!(station: station, route: route) do |sr|
+      sr.position = index
+      base_time = Time.parse('06:00') + (index * 3).hours
+      sr.arrival = base_time if index > 0
+      sr.departure = base_time + 30.minutes
+    end
+
+    next unless legacy_map && station.type == 'RailwayStation'
+
+    legacy_station = legacy_map[station.city]
+    next unless legacy_station
+
+    RailwayStationsRoute.find_or_create_by!(railway_station: legacy_station, route: route) do |rs|
+      rs.position = index
+      rs.arrival = (Time.parse('06:00') + (index * 3).hours).strftime('%H:%M') if index > 0
+      rs.departure = (Time.parse('06:30') + (index * 3).hours).strftime('%H:%M')
+    end
+  end
+end
 
 puts "Creating stations..."
 
-# Railway Stations (using raw insert to avoid STI conflict with existing RailwayStation model)
-railway_cities = ['Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg', 'Kazan', 'Nizhny Novgorod', 'Samara', 'Omsk', 'Chelyabinsk', 'Rostov-on-Don']
-railway_stations = railway_cities.map do |city|
-  station = Station.find_by(title: "#{city} Railway Station", type: 'RailwayStation')
-  unless station
-    station = Station.new
-    station.title = "#{city} Railway Station"
-    station.city = city
-    station[:type] = 'RailwayStation'  # Set type directly to avoid STI lookup
-    station.save!
-  end
-  station
+rail_cities = %w[
+  Moscow Saint_Petersburg Novosibirsk Yekaterinburg Kazan Nizhny_Novgorod Samara Omsk Chelyabinsk Rostov_on_Don
+  Ufa Volgograd Perm Krasnoyarsk Voronezh Saratov Tolyatti Izhevsk Barnaul Ulyanovsk Irkutsk Khabarovsk
+  Yaroslavl Vladivostok Makhachkala Tomsk Orenburg Kemerovo Novokuznetsk Ryazan Astrakhan Penza
+  Lipetsk Kirov Cheboksary Tula Kaliningrad Kursk Belgorod Sochi Tyumen
+].map { |city| city.tr('_', ' ') }
+
+railway_stations = []
+legacy_railway_stations = {}
+
+rail_cities.first(TARGETS[:railway_stations]).each do |city|
+  legacy = RailwayStation.find_or_create_by!(title: "#{city} Railway Station")
+  legacy_railway_stations[city] = legacy
+
+  station = Station.create!(
+    title: "#{city} Railway Station",
+    city: city,
+    type: 'RailwayStation'
+  )
+  railway_stations << station
 end
+
 puts "  Created #{railway_stations.count} railway stations"
 
-# Airports
-airports_data = [
-  { city: 'Moscow', title: 'Sheremetyevo International Airport', code: 'SVO' },
-  { city: 'Moscow', title: 'Domodedovo International Airport', code: 'DME' },
-  { city: 'Saint Petersburg', title: 'Pulkovo Airport', code: 'LED' },
-  { city: 'Novosibirsk', title: 'Tolmachevo Airport', code: 'OVB' },
-  { city: 'Yekaterinburg', title: 'Koltsovo Airport', code: 'SVX' },
-  { city: 'Kazan', title: 'Kazan International Airport', code: 'KZN' },
-  { city: 'Sochi', title: 'Sochi International Airport', code: 'AER' },
-  { city: 'Krasnodar', title: 'Pashkovsky Airport', code: 'KRR' }
+airport_data = [
+  ['Moscow', 'SVO', 'Sheremetyevo International Airport'],
+  ['Moscow', 'DME', 'Domodedovo International Airport'],
+  ['Moscow', 'VKO', 'Vnukovo International Airport'],
+  ['Saint Petersburg', 'LED', 'Pulkovo Airport'],
+  ['Novosibirsk', 'OVB', 'Tolmachevo Airport'],
+  ['Yekaterinburg', 'SVX', 'Koltsovo Airport'],
+  ['Kazan', 'KZN', 'Kazan International Airport'],
+  ['Sochi', 'AER', 'Sochi International Airport'],
+  ['Krasnodar', 'KRR', 'Pashkovsky Airport'],
+  ['Ufa', 'UFA', 'Ufa International Airport'],
+  ['Samara', 'KUF', 'Kurumoch Airport'],
+  ['Perm', 'PEE', 'Perm International Airport'],
+  ['Rostov-on-Don', 'ROV', 'Platov Airport'],
+  ['Volgograd', 'VOG', 'Gumrak Airport'],
+  ['Nizhny Novgorod', 'GOJ', 'Strigino Airport'],
+  ['Kaliningrad', 'KGD', 'Khrabrovo Airport'],
+  ['Vladivostok', 'VVO', 'Vladivostok Airport'],
+  ['Khabarovsk', 'KHV', 'Khabarovsk Novy Airport'],
+  ['Irkutsk', 'IKT', 'Irkutsk Airport'],
+  ['Tyumen', 'TJM', 'Roshchino Airport'],
+  ['Saratov', 'GSV', 'Gagarin Airport'],
+  ['Astrakhan', 'ASF', 'Narimanovo Airport'],
+  ['Murmansk', 'MMK', 'Murmansk Airport'],
+  ['Arkhangelsk', 'ARH', 'Talagi Airport'],
+  ['Yuzhno-Sakhalinsk', 'UUS', 'Yuzhno-Sakhalinsk Airport'],
+  ['Mineralnye Vody', 'MRV', 'Mineralnye Vody Airport'],
+  ['Omsk', 'OMS', 'Omsk Airport'],
+  ['Chelyabinsk', 'CEK', 'Balandino Airport'],
+  ['Barnaul', 'BAX', 'Barnaul Airport'],
+  ['Tomsk', 'TOF', 'Tomsk Airport'],
+  ['Orenburg', 'REN', 'Orenburg Airport']
 ]
-airports = airports_data.map do |data|
-  Airport.find_or_create_by!(code: data[:code]) do |a|
-    a.title = data[:title]
-    a.city = data[:city]
-  end
+
+airports = airport_data.first(TARGETS[:airports]).map do |city, code, title|
+  Airport.create!(
+    city: city,
+    code: code,
+    title: title
+  )
 end
+
 puts "  Created #{airports.count} airports"
 
-# Bus Stations
-bus_cities = ['Moscow', 'Saint Petersburg', 'Kazan', 'Nizhny Novgorod', 'Vladimir', 'Yaroslavl', 'Tver', 'Ryazan']
-bus_stations = bus_cities.map do |city|
-  BusStation.find_or_create_by!(title: "#{city} Bus Station") do |s|
-    s.city = city
-  end
+bus_cities = %w[
+  Moscow Saint_Petersburg Kazan Nizhny_Novgorod Vladimir Yaroslavl Tver Ryazan Tula Smolensk Bryansk Kursk
+  Belgorod Voronezh Lipetsk Tambov Saratov Volgograd Astrakhan Penza Samara Ufa Orenburg Cheboksary
+  Izhevsk Kirov Perm Ulyanovsk Chelyabinsk Tyumen
+].map { |city| city.tr('_', ' ') }
+
+bus_stations = bus_cities.first(TARGETS[:bus_stations]).map do |city|
+  BusStation.create!(
+    title: "#{city} Bus Station",
+    city: city
+  )
 end
+
 puts "  Created #{bus_stations.count} bus stations"
 
 puts "Creating routes..."
 
-# Helper to find station by city
-def find_railway_station(city)
-  Station.find_by(city: city, type: 'RailwayStation')
-end
+train_routes = []
 
-# Train Routes
-train_routes_data = [
-  { name: 'Moscow - Saint Petersburg', cities: ['Moscow', 'Saint Petersburg'] },
-  { name: 'Moscow - Kazan', cities: ['Moscow', 'Nizhny Novgorod', 'Kazan'] },
-  { name: 'Moscow - Novosibirsk', cities: ['Moscow', 'Kazan', 'Yekaterinburg', 'Omsk', 'Novosibirsk'] },
-  { name: 'Saint Petersburg - Kazan', cities: ['Saint Petersburg', 'Moscow', 'Nizhny Novgorod', 'Kazan'] }
+special_train_pairs = [
+  ['Samara', 'Yekaterinburg'],
+  ['Moscow', 'Kazan'],
+  ['Saint Petersburg', 'Moscow'],
+  ['Novosibirsk', 'Omsk'],
+  ['Perm', 'Ufa'],
+  ['Krasnoyarsk', 'Irkutsk'],
+  ['Chelyabinsk', 'Tyumen'],
+  ['Rostov-on-Don', 'Volgograd']
 ]
 
-train_routes_data.each do |route_data|
-  route = Route.find_or_initialize_by(name: route_data[:name])
-  route.save!(validate: false) if route.new_record?
-  route_data[:cities].each_with_index do |city, index|
-    station = find_railway_station(city)
-    next unless station
-    StationsRoute.find_or_create_by!(station: station, route: route) do |sr|
-      sr.position = index
-      sr.arrival = Time.parse("#{6 + index * 3}:00") if index > 0
-      sr.departure = Time.parse("#{6 + index * 3}:30")
-    end
-  end
+special_train_pairs.each do |start_city, end_city|
+  start_station = railway_stations.find { |s| s.city == start_city }
+  end_station = railway_stations.find { |s| s.city == end_city }
+  next unless start_station && end_station
+
+  route = ensure_route("#{start_city} - #{end_city}")
+  attach_stations(route, [start_station, end_station], legacy_map: legacy_railway_stations)
+  train_routes << route
 end
-puts "  Created #{train_routes_data.count} train routes"
 
-# Flight Routes
-flight_routes = [
-  { name: 'Moscow (SVO) - Saint Petersburg', start: 'SVO', end_code: 'LED' },
-  { name: 'Moscow (DME) - Sochi', start: 'DME', end_code: 'AER' },
-  { name: 'Moscow (SVO) - Novosibirsk', start: 'SVO', end_code: 'OVB' },
-  { name: 'Saint Petersburg - Kazan', start: 'LED', end_code: 'KZN' },
-  { name: 'Moscow (SVO) - Yekaterinburg', start: 'SVO', end_code: 'SVX' }
-]
+while train_routes.uniq.size < TARGETS[:train_routes]
+  selected = railway_stations.sample(rand(2..5))
+  next if selected.uniq.size < 2
 
-flight_routes.each do |route_data|
-  route = Route.find_or_initialize_by(name: route_data[:name])
-  route.save!(validate: false) if route.new_record?
-  start_airport = Airport.find_by(code: route_data[:start])
-  end_airport = Airport.find_by(code: route_data[:end_code])
-  next unless start_airport && end_airport
-
-  StationsRoute.find_or_create_by!(station: start_airport, route: route) do |sr|
-    sr.position = 0
-    sr.departure = Time.parse("08:00")
-  end
-  StationsRoute.find_or_create_by!(station: end_airport, route: route) do |sr|
-    sr.position = 1
-    sr.arrival = Time.parse("10:30")
-  end
+  route = ensure_route("#{selected.first.city} - #{selected.last.city}")
+  attach_stations(route, selected, legacy_map: legacy_railway_stations) if route.stations_routes.size < 2
+  train_routes << route
 end
+
+train_routes.uniq!
+puts "  Created #{train_routes.count} train routes"
+
+flight_routes = []
+while flight_routes.uniq.size < TARGETS[:flight_routes]
+  selected = airports.sample(2)
+  next if selected.uniq.size < 2
+
+  route = ensure_route("#{selected.first.code} - #{selected.last.code}")
+  attach_stations(route, selected)
+  flight_routes << route
+end
+
+flight_routes.uniq!
 puts "  Created #{flight_routes.count} flight routes"
 
-# Bus Routes
-bus_routes_data = [
-  { name: 'Moscow - Vladimir (Bus)', cities: ['Moscow', 'Vladimir'] },
-  { name: 'Moscow - Yaroslavl (Bus)', cities: ['Moscow', 'Yaroslavl'] },
-  { name: 'Moscow - Ryazan (Bus)', cities: ['Moscow', 'Ryazan'] },
-  { name: 'Saint Petersburg - Tver (Bus)', cities: ['Saint Petersburg', 'Tver'] }
-]
+bus_routes = []
+while bus_routes.uniq.size < TARGETS[:bus_routes]
+  selected = bus_stations.sample(rand(2..4))
+  next if selected.uniq.size < 2
 
-bus_routes_data.each do |route_data|
-  route = Route.find_or_initialize_by(name: route_data[:name])
-  route.save!(validate: false) if route.new_record?
-  route_data[:cities].each_with_index do |city, index|
-    station = BusStation.find_by(city: city)
-    next unless station
-    StationsRoute.find_or_create_by!(station: station, route: route) do |sr|
-      sr.position = index
-      sr.arrival = Time.parse("#{7 + index * 2}:00") if index > 0
-      sr.departure = Time.parse("#{7 + index * 2}:15")
-    end
-  end
+  route = ensure_route("#{selected.first.city} - #{selected.last.city} (Bus)")
+  attach_stations(route, selected)
+  bus_routes << route
 end
-puts "  Created #{bus_routes_data.count} bus routes"
+
+bus_routes.uniq!
+puts "  Created #{bus_routes.count} bus routes"
 
 puts "Creating vehicles..."
 
-# Trains
-trains_data = [
-  { number: '001A', route: 'Moscow - Saint Petersburg' },
-  { number: '002A', route: 'Moscow - Saint Petersburg' },
-  { number: '015B', route: 'Moscow - Kazan' },
-  { number: '099C', route: 'Moscow - Novosibirsk' }
-]
+TARGETS[:trains].times do |index|
+  route = train_routes.sample
+  train = Train.create!(
+    number: "T#{1000 + index}",
+    route: route,
+    current_station: route.stations.first
+  )
 
-trains_data.each do |train_data|
-  route = Route.find_by(name: train_data[:route])
-  next unless route
-
-  train = Train.find_or_create_by!(number: train_data[:number]) do |t|
-    t.route = route
-    t.current_station = route.stations.first
-  end
-
-  # Create compartments with seats
-  [
-    { class_type: 'lux', base_price: 8000 },
-    { class_type: 'coupe', base_price: 4000 },
-    { class_type: 'coupe', base_price: 4000 },
-    { class_type: 'economy', base_price: 2000 },
-    { class_type: 'economy', base_price: 2000 },
-    { class_type: 'sitting', base_price: 1500 }
-  ].each do |comp_data|
-    comp = train.compartments.find_or_create_by!(class_type: comp_data[:class_type], type: 'TrainCompartment') do |c|
-      c.base_price = comp_data[:base_price]
-    end
-    comp.generate_seats! if comp.seats.empty? && comp.respond_to?(:generate_seats!)
+  classes = %w[economy coupe sitting lux].sample(2)
+  classes.each do |class_type|
+    compartment = TrainCompartment.create!(
+      vehicle: train,
+      class_type: class_type,
+      base_price: rand(1200..3200)
+    )
+    compartment.generate_seats! if compartment.seats.empty?
   end
 end
-puts "  Created #{Train.count} trains"
 
-# Planes
-planes_data = [
-  { number: 'SU-100', route: 'Moscow (SVO) - Saint Petersburg' },
-  { number: 'SU-200', route: 'Moscow (DME) - Sochi' },
-  { number: 'S7-300', route: 'Moscow (SVO) - Novosibirsk' },
-  { number: 'DP-400', route: 'Saint Petersburg - Kazan' }
-]
+TARGETS[:planes].times do |index|
+  route = flight_routes.sample
+  plane = Plane.create!(
+    number: "SU#{2000 + index}",
+    route: route,
+    current_station: route.stations.first
+  )
 
-planes_data.each do |plane_data|
-  route = Route.find_by(name: plane_data[:route])
-  next unless route
+  AirplaneCabin.create!(
+    vehicle: plane,
+    class_type: 'economy',
+    base_price: rand(4500..9000)
+  ).generate_seats!
 
-  plane = Plane.find_or_create_by!(number: plane_data[:number]) do |p|
-    p.route = route
-    p.current_station = route.stations.first
-  end
-
-  # Create cabins with seats
-  [
-    { class_type: 'first', base_price: 25000 },
-    { class_type: 'business', base_price: 15000 },
-    { class_type: 'economy', base_price: 5000 }
-  ].each do |cabin_data|
-    cabin = plane.compartments.find_or_create_by!(class_type: cabin_data[:class_type], type: 'AirplaneCabin') do |c|
-      c.base_price = cabin_data[:base_price]
-    end
-    cabin.generate_seats! if cabin.seats.empty? && cabin.respond_to?(:generate_seats!)
+  %w[business first].sample(1).each do |class_type|
+    AirplaneCabin.create!(
+      vehicle: plane,
+      class_type: class_type,
+      base_price: rand(12000..26000)
+    ).generate_seats!
   end
 end
-puts "  Created #{Plane.count} planes"
 
-# Buses
-buses_data = [
-  { number: 'BUS-101', route: 'Moscow - Vladimir (Bus)' },
-  { number: 'BUS-102', route: 'Moscow - Yaroslavl (Bus)' },
-  { number: 'BUS-103', route: 'Moscow - Ryazan (Bus)' }
-]
+TARGETS[:buses].times do |index|
+  route = bus_routes.sample
+  bus = Bus.create!(
+    number: "B#{3000 + index}",
+    route: route,
+    current_station: route.stations.first
+  )
 
-buses_data.each do |bus_data|
-  route = Route.find_by(name: bus_data[:route])
-  next unless route
-
-  bus = Bus.find_or_create_by!(number: bus_data[:number]) do |b|
-    b.route = route
-    b.current_station = route.stations.first
-  end
-
-  # Create sections with seats
-  [
-    { class_type: 'economy', base_price: 800 }
-  ].each do |section_data|
-    section = bus.compartments.find_or_create_by!(class_type: section_data[:class_type], type: 'BusSection') do |c|
-      c.base_price = section_data[:base_price]
-    end
-    section.generate_seats! if section.seats.empty? && section.respond_to?(:generate_seats!)
-  end
+  class_type = rand < 0.2 ? 'business' : 'economy'
+  BusSection.create!(
+    vehicle: bus,
+    class_type: class_type,
+    base_price: rand(500..1800)
+  ).generate_seats!
 end
-puts "  Created #{Bus.count} buses"
+
+puts "  Created #{Train.count} trains, #{Plane.count} planes, #{Bus.count} buses"
 
 puts "Creating users..."
 
-# Admin user
 admin = User.find_or_initialize_by(email: 'admin@tutu.ru')
 admin.assign_attributes(
   name: 'Admin',
@@ -255,9 +292,7 @@ admin.assign_attributes(
 )
 admin.skip_confirmation!
 admin.save!
-puts "  Admin user created: admin@tutu.ru / password123"
 
-# Regular user
 user = User.find_or_initialize_by(email: 'user@example.com')
 user.assign_attributes(
   name: 'Test',
@@ -272,7 +307,44 @@ user.assign_attributes(
 )
 user.skip_confirmation!
 user.save!
-puts "  Regular user created: user@example.com / password123"
+
+puts "Creating schedules (tickets)..."
+
+users = [admin, user]
+vehicles = Vehicle.includes(:route).to_a
+start_date = Date.current
+time_zone = Time.zone || ActiveSupport::TimeZone['UTC']
+
+vehicles.each do |vehicle|
+  TARGETS[:schedule_days].times do |offset|
+    next unless ((vehicle.id + offset) % 3).zero?
+
+    service_date = start_date + offset
+    base_hour = 6 + (vehicle.id % 10)
+    departure_time = time_zone.local(service_date.year, service_date.month, service_date.day, base_hour, (vehicle.id % 2) * 30)
+    arrival_time = departure_time + rand(2..8).hours
+
+    ticket_attrs = {
+      user: users.sample,
+      vehicle: vehicle,
+      passenger_name: "Passenger #{SecureRandom.hex(3)}",
+      passenger_passport: SecureRandom.random_number(10**10).to_s.rjust(10, '0'),
+      price: rand(1200..12000),
+      status: %w[pending confirmed].sample,
+      departure_time: departure_time,
+      arrival_time: arrival_time
+    }
+
+    if vehicle.is_a?(Train) && vehicle.route
+      start_city = vehicle.route.start_station&.city
+      end_city = vehicle.route.end_station&.city
+      ticket_attrs[:start_station] = legacy_railway_stations[start_city] if start_city
+      ticket_attrs[:end_station] = legacy_railway_stations[end_city] if end_city
+    end
+
+    Ticket.create!(ticket_attrs)
+  end
+end
 
 puts ""
 puts "=" * 50
@@ -287,8 +359,8 @@ puts "  - Routes: #{Route.count}"
 puts "  - Trains: #{Train.count}"
 puts "  - Planes: #{Plane.count}"
 puts "  - Buses: #{Bus.count}"
-puts "  - Total Seats: #{Seat.count}"
-puts "  - Users: #{User.count}"
+puts "  - Seats: #{Seat.count}"
+puts "  - Tickets: #{Ticket.count}"
 puts ""
 puts "Login credentials:"
 puts "  Admin: admin@tutu.ru / password123"

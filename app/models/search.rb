@@ -39,15 +39,18 @@ class Search
   end
 
   def search_trains
-    trains_by_route_station(start_station) & trains_by_route_station(end_station)
+    results = trains_by_route_station(start_station) & trains_by_route_station(end_station)
+    filter_by_date(results, 'Train')
   end
 
   def search_planes
-    vehicles_by_stations(start_station, end_station, 'Plane')
+    results = vehicles_by_stations(start_station, end_station, 'Plane')
+    filter_by_date(results, 'Plane')
   end
 
   def search_buses
-    vehicles_by_stations(start_station, end_station, 'Bus')
+    results = vehicles_by_stations(start_station, end_station, 'Bus')
+    filter_by_date(results, 'Bus')
   end
 
   def trains_by_route_station(station)
@@ -92,7 +95,36 @@ class Search
   end
 
   def find_station(station_id)
-    RailwayStation.find_by(id: station_id) ||
-      Station.find_by(id: station_id)
+    legacy = RailwayStation.find_by(id: station_id)
+    return Station.find_by(title: legacy.title, type: 'RailwayStation') if legacy
+
+    Station.find_by(id: station_id)
+  end
+
+  def filter_by_date(vehicles, vehicle_type)
+    return vehicles if vehicles.blank?
+
+    search_date = parsed_date
+    return vehicles if search_date.nil?
+
+    ids = vehicles.map(&:id)
+    return vehicles if ids.empty?
+
+    ticket_ids = Ticket.where(vehicle_type: vehicle_type, vehicle_id: ids)
+                       .where(departure_time: search_date.beginning_of_day..search_date.end_of_day)
+                       .distinct
+                       .pluck(:vehicle_id)
+
+    return vehicles if ticket_ids.empty?
+
+    vehicles.select { |vehicle| ticket_ids.include?(vehicle.id) }
+  end
+
+  def parsed_date
+    return nil if date.blank?
+
+    Date.parse(date.to_s)
+  rescue ArgumentError, TypeError
+    nil
   end
 end

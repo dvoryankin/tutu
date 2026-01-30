@@ -1,13 +1,13 @@
 class SearchesController < ApplicationController
   def show
     @search = Search.new
-    @stations = RailwayStation.all + Station.all
+    @stations = Station.order(:title, :city)
     @transport_types = Search::TRANSPORT_TYPES
   end
 
   def create
     @search = Search.do(search_params)
-    @stations = RailwayStation.all + Station.all
+    @stations = Station.order(:title, :city)
     @transport_types = Search::TRANSPORT_TYPES
     render :show
   end

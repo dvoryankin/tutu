@@ -1,7 +1,11 @@
 <tr>
-  <td><%= ticket.train.number %></td>
-  <td><%= ticket.start_station.title %></td>
-  <td><%= ticket.end_station.title %></td>
+  <% vehicle = ticket.transport_vehicle %>
+  <% route = vehicle&.route %>
+  <% start_station = ticket.start_station || route&.start_station %>
+  <% end_station = ticket.end_station || route&.end_station %>
+  <td><%= vehicle&.number || '—' %></td>
+  <td><%= start_station&.title || '—' %></td>
+  <td><%= end_station&.title || '—' %></td>
   <td><%= ticket.user.email %></td>
   <td>
     <%= ticket.passenger_name %><br>
